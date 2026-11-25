@@ -11,7 +11,10 @@ public sealed class RenderTargets : IDisposable
     public readonly RenderTarget ResolvedColor;
     public readonly RenderTarget Depth;
     public readonly RenderTarget ResolvedDepth;
-    public readonly RenderTarget PostProcess;
+    public readonly RenderTarget PostProcessA;
+    public readonly RenderTarget PostProcessB;
+    
+    public RenderTarget[] PostChain { get; }
     
     public RenderTargets(VmaAllocator allocator, VkFormat swapchainFormat, VkExtent2D extent, VkSampleCountFlags msaa)
     {
@@ -29,8 +32,19 @@ public sealed class RenderTargets : IDisposable
         ResolvedDepth = new RenderTarget(allocator, "Resolved Depth Render Target", VkFormat.D32SFloat, extent,
             VkImageUsageFlags.DepthStencilAttachmentBit | VkImageUsageFlags.SampledBit, aspect: VkImageAspectFlags.DepthBit);
         
-        PostProcess = new RenderTarget(allocator, "Post Process Render Target", swapchainFormat, extent,
+        PostProcessA = new RenderTarget(allocator, "Post Process A Render Target", swapchainFormat, extent,
             VkImageUsageFlags.ColorAttachmentBit | VkImageUsageFlags.SampledBit);
+        
+        PostProcessB = new RenderTarget(allocator, "Post Process B Render Target", swapchainFormat, extent,
+            VkImageUsageFlags.ColorAttachmentBit | VkImageUsageFlags.SampledBit);
+
+        PostChain = [PostProcessA, PostProcessB];
+    }
+
+    public void BeginFrame()
+    {
+        foreach (var t in new[] { Color, ResolvedColor, Depth, ResolvedDepth, PostProcessA, PostProcessB })
+            t.HasData = false;
     }
     
     public void Dispose()
@@ -39,6 +53,7 @@ public sealed class RenderTargets : IDisposable
         ResolvedColor.Dispose();
         Depth.Dispose();
         ResolvedDepth.Dispose();
-        PostProcess.Dispose();
+        PostProcessA.Dispose();
+        PostProcessB.Dispose();
     }
 }

@@ -165,7 +165,7 @@ public sealed class SceneRenderer : IFrameListener, IDisposable
                     Color = o.Color,
                     DataType = o.DataType,
                     Flags = o.Flags,
-                    ItemId = o.ObjectId
+                    Id = o.ObjectId
                 }
             );
         }

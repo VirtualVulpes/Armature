@@ -19,33 +19,12 @@ public class EntityIdPass : IRenderPass
         _editor = editor;
     }
 
-    public unsafe void Record(in RenderContext ctx, ReadOnlySpan<RenderItem> renderObjects)
+    public unsafe void Record(in RenderContext ctx, ReadOnlySpan<RenderItem> items)
     {
-        _editor.EntityId.Image.TransitionTo(ctx.CommandBuffer,
-            VkImageLayout.ColorAttachmentOptimal, VkPipelineStageFlags.ColorAttachmentOutputBit,
-            VkAccessFlags.ColorAttachmentWriteBit);
+        var colorAttachment = _editor.EntityId.AsColorAttachment(ctx.CommandBuffer,
+            clear: new VkClearColorValue { Uint32 = new uint4(uint.MaxValue, 0, 0, 0) });
 
-        _editor.EntityIdDepth.Image.TransitionTo(ctx.CommandBuffer,
-            VkImageLayout.DepthAttachmentOptimal, VkPipelineStageFlags.EarlyFragmentTestsBit,
-            VkAccessFlags.DepthStencilAttachmentReadBit, VkImageAspectFlags.DepthBit);
-        
-        var colorAttachment = new VkRenderingAttachmentInfo
-        {
-            ImageView = _editor.EntityId.View.VkImageView,
-            ImageLayout = VkImageLayout.ColorAttachmentOptimal,
-            LoadOp = VkAttachmentLoadOp.Clear,
-            StoreOp = VkAttachmentStoreOp.Store,
-            ClearValue = new VkClearColorValue { Uint32 = new uint4(uint.MaxValue, 0, 0, 0) }
-        };
-
-        var depthAttachment = new VkRenderingAttachmentInfo
-        {
-            ImageView = _editor.EntityIdDepth.View.VkImageView,
-            ImageLayout = VkImageLayout.DepthAttachmentOptimal,
-            LoadOp = VkAttachmentLoadOp.Clear,
-            StoreOp = VkAttachmentStoreOp.DontCare,
-            ClearValue = new VkClearDepthStencilValue { Depth = 1.0f, Stencil = 0 }
-        };
+        var depthAttachment = _editor.EntityIdDepth.AsDepthAttachment(ctx.CommandBuffer, store: false);
         
         ctx.CommandBuffer.BeginRendering(
             new VkRenderingInfo
@@ -73,17 +52,17 @@ public class EntityIdPass : IRenderPass
 
         ctx.CommandBuffer.BindPipeline(VkPipelineBindPoint.Graphics, _pipeline.Handle);
 
-        foreach (var renderObject in renderObjects)
+        foreach (var item in items)
         {
             var vertPushConsts = new PushConstantBlocks.VertexBlock
             {
-                Mvp = renderObject.ModelMatrix * ctx.ViewProj,
-                Model = renderObject.ModelMatrix
+                Mvp = item.ModelMatrix * ctx.ViewProj,
+                Model = item.ModelMatrix
             };
 
             var fragPushConsts = new PushConstantBlocks.EntityIdBlock
             {
-                Id = renderObject.ItemId
+                Id = item.Id
             };
 
             ctx.CommandBuffer.PushConstants(_pipeline.Layout, VkShaderStageFlags.VertexBit, ByteSize.Zero,
@@ -92,7 +71,7 @@ public class EntityIdPass : IRenderPass
             ctx.CommandBuffer.PushConstants(_pipeline.Layout, VkShaderStageFlags.FragmentBit, ByteSize.Of<PushConstantBlocks.VertexBlock>(),
                 fragPushConsts);
 
-            var gpuMesh = renderObject.GpuMesh;
+            var gpuMesh = item.GpuMesh;
 
             ctx.CommandBuffer.BindVertexBuffers(0, [gpuMesh.VertexBuffer], [new ByteSize64(0)]);
             ctx.CommandBuffer.BindIndexBuffer(gpuMesh.IndexBuffer, new ByteSize64(0), VkIndexType.UInt32);

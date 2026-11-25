@@ -5,7 +5,7 @@ using Brutal.Numerics;
 using Brutal.VulkanApi;
 using Brutal.VulkanApi.Abstractions;
 
-namespace Armature.DebugUi;
+namespace Armature.DebugUi.Passes;
 
 public class ImGuiPass : IRenderPass
 {
@@ -18,14 +18,7 @@ public class ImGuiPass : IRenderPass
 
     public unsafe void Record(in RenderContext ctx, ReadOnlySpan<RenderItem> _)
     {
-        var colorAttachment = new VkRenderingAttachmentInfo
-        {
-            ImageView = ctx.SwapchainImageView,
-            ImageLayout = VkImageLayout.ColorAttachmentOptimal,
-            LoadOp = VkAttachmentLoadOp.Load,
-            StoreOp = VkAttachmentStoreOp.Store,
-            ClearValue = new VkClearColorValue { Float32 = new float4(0.01f, 0.01f, 0.01f, 1.0f) }
-        };
+        var colorAttachment = ctx.SceneColor.AsColorAttachment(ctx.CommandBuffer);
         
         ctx.CommandBuffer.BeginRendering(
             new VkRenderingInfo

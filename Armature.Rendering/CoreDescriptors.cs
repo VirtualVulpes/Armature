@@ -25,7 +25,6 @@ public sealed class CoreDescriptors : IDisposable
 
         CreateGlobalSet();
         CreatePerFrameSet();
-
     }
 
     private void CreateDescriptorPool()
@@ -133,6 +132,32 @@ public sealed class CoreDescriptors : IDisposable
         PerFrameLayout = _context.Device.CreateDescriptorSetLayout(layoutInfo, null);
     }
 
+    public unsafe void RegisterTarget(RenderTarget target, int slot)
+    {
+        target.BindlessIndex = RenderConstants.RenderTargetBase + slot;
+
+        var imageInfo = new VkDescriptorImageInfo
+        {
+            Sampler = _textureSampler,
+            ImageView = target.View.VkImageView,
+            ImageLayout = VkImageLayout.ShaderReadOnlyOptimal
+        };
+
+        ReadOnlySpan<VkWriteDescriptorSet> writes =
+        [
+            new()
+            {
+                DstSet = GlobalSet,
+                DstBinding = 0,
+                DstArrayElement = target.BindlessIndex,
+                DescriptorCount = 1,
+                DescriptorType = VkDescriptorType.CombinedImageSampler,
+                ImageInfo = &imageInfo
+            }
+        ];
+        _context.Device.UpdateDescriptorSets(writes, null);
+    }
+
     public unsafe void UpdateTextureDescriptor(Texture texture)
     {
         var imageInfo = new VkDescriptorImageInfo
@@ -161,7 +186,7 @@ public sealed class CoreDescriptors : IDisposable
     {
         return _context.Device.AllocateDescriptorSet(_descriptorPool, PerFrameLayout);
     }
-    
+
     private void CreateTextureSampler()
     {
         var samplerInfo = new VkSamplerCreateInfo

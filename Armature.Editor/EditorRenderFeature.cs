@@ -7,17 +7,19 @@ namespace Armature.Editor;
 
 public sealed class EditorRenderFeature : IFrameListener, IDisposable
 {
+    private readonly CoreDescriptors _core;
     private readonly EditorTargets _targets;
     private readonly IEditorTargetConsumer[] _consumers;
 
     public EditorRenderFeature(Renderer renderer, VulkanContext ctx, PipelineManager pipelines,
-        EditorDescriptors descriptors)
+        CoreDescriptors core, EditorDescriptors descriptors)
     {
+        _core = core;
         _targets = new EditorTargets(ctx.Allocator, renderer.Targets.Extent);
-
+        
         var seed = new SeedInitPass(pipelines.GetPipeline("Seed Init"), descriptors);
         var flood = new JumpFloodPass(pipelines.GetPipeline("Jump Flood"), descriptors);
-        var outline = new OutlineCompositePass(pipelines.GetPipeline("Outline Composite"), descriptors);
+        var outline = new OutlineCompositePass(pipelines.GetPipeline("Outline Composite"));
         _consumers = [seed, flood, outline];
         
         Picker = new EntityPicker(ctx, _targets);
@@ -42,8 +44,14 @@ public sealed class EditorRenderFeature : IFrameListener, IDisposable
         Rebind(core);
     }
 
+    public void OnPrepare(RenderContext ctx)
+    {
+        _targets.BeginFrame();
+    }
+
     private void Rebind(RenderTargets core)
     {
+        _core.RegisterTarget(_targets.SeedA, 4);
         foreach (var c in _consumers) c.OnTargetsRecreated(core, _targets);
     }
 

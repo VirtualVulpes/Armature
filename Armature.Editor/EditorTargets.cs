@@ -47,6 +47,12 @@ public sealed class EditorTargets : IDisposable
         SeedB = new RenderTarget(_allocator, "Seed B Render Target", VkFormat.R32G32SInt, extent,
             VkImageUsageFlags.TransferDstBit | VkImageUsageFlags.StorageBit | VkImageUsageFlags.SampledBit);
     }
+    
+    public void BeginFrame()
+    {
+        foreach (var t in new[] { EntityId, EntityIdDepth, SelectionMask, SeedA, SeedB })
+            t.HasData = false;
+    }
 
     private void DisposeTargets()
     {

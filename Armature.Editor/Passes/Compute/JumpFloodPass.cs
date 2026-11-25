@@ -29,20 +29,18 @@ public class JumpFloodPass : IRenderPass, IEditorTargetConsumer
         _bToASet = editor.AllocateSeedDescriptorSet();
     }
 
-    public void Record(in RenderContext context, ReadOnlySpan<RenderItem> _)
+    public void Record(in RenderContext ctx, ReadOnlySpan<RenderItem> _)
     {
-        _targets.SeedA.Image.TransitionTo(context.CommandBuffer, VkImageLayout.General,
-            VkPipelineStageFlags.ComputeShaderBit, VkAccessFlags.ShaderReadBit | VkAccessFlags.ShaderWriteBit);
-        _targets.SeedB.Image.TransitionTo(context.CommandBuffer, VkImageLayout.General,
-            VkPipelineStageFlags.ComputeShaderBit, VkAccessFlags.ShaderReadBit | VkAccessFlags.ShaderWriteBit);
-
-        context.CommandBuffer.BindPipeline(VkPipelineBindPoint.Compute, _pipeline.Handle);
+        _targets.SeedA.AsStorage(ctx.CommandBuffer);
+        _targets.SeedB.AsStorage(ctx.CommandBuffer, discard: true);
+        
+        ctx.CommandBuffer.BindPipeline(VkPipelineBindPoint.Compute, _pipeline.Handle);
 
         var isPassA = true;
 
         for (var i = StartJump; i >= 1; i >>= 1)
         {
-            context.CommandBuffer.PipelineBarrier(
+            ctx.CommandBuffer.PipelineBarrier(
                 VkPipelineStageFlags.ComputeShaderBit,
                 VkPipelineStageFlags.ComputeShaderBit,
                 VkDependencyFlags.None,
@@ -57,7 +55,7 @@ public class JumpFloodPass : IRenderPass, IEditorTargetConsumer
                 []
             );
 
-            context.CommandBuffer
+            ctx.CommandBuffer
                 .BindDescriptorSets(VkPipelineBindPoint.Compute, _pipeline.Layout, 0,
                     [
                         isPassA
@@ -71,14 +69,14 @@ public class JumpFloodPass : IRenderPass, IEditorTargetConsumer
                 JumpDistance = i
             };
 
-            context.CommandBuffer.PushConstants(_pipeline.Layout, VkShaderStageFlags.ComputeBit, ByteSize.Zero,
+            ctx.CommandBuffer.PushConstants(_pipeline.Layout, VkShaderStageFlags.ComputeBit, ByteSize.Zero,
                 pushConsts);
 
             const int localSizeX = 16;
             const int localSizeY = 16;
 
-            context.CommandBuffer.Dispatch((context.Targets.Extent.Width + localSizeX - 1) / localSizeX,
-                (context.Targets.Extent.Height + localSizeY - 1) / localSizeY, 1);
+            ctx.CommandBuffer.Dispatch((ctx.Targets.Extent.Width + localSizeX - 1) / localSizeX,
+                (ctx.Targets.Extent.Height + localSizeY - 1) / localSizeY, 1);
 
             isPassA = !isPassA;
         }
