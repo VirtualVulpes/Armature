@@ -7,7 +7,7 @@ namespace Armature.Rendering;
 public sealed class TrackedImage : IDisposable
 {
     public ImageEx Image { get; }
-    public VkImageLayout Layout { get; private set;  }
+    public VkImageLayout Layout { get; private set; }
     private VkPipelineStageFlags _stage;
     private VkAccessFlags _access;
 
@@ -23,12 +23,16 @@ public sealed class TrackedImage : IDisposable
         VkImageLayout newLayout,
         VkPipelineStageFlags dstStage,
         VkAccessFlags dstAccess,
-        VkImageAspectFlags aspect = VkImageAspectFlags.ColorBit)
+        VkImageAspectFlags aspect = VkImageAspectFlags.ColorBit, bool discardContents = false)
     {
-        var wasPrevWrite = (_access & (VkAccessFlags.ColorAttachmentWriteBit | VkAccessFlags.ShaderWriteBit)) != 0;
+        var oldLayout = discardContents ? VkImageLayout.Undefined : Layout;
+        var wasPrevWrite = (_access & (VkAccessFlags.ColorAttachmentWriteBit | VkAccessFlags.ShaderWriteBit |
+                                       VkAccessFlags.DepthStencilAttachmentWriteBit |
+                                       VkAccessFlags.TransferWriteBit)) != 0;
         if (Layout == newLayout && _stage == dstStage && _access == dstAccess && !wasPrevWrite) return;
-        
-        ImageUtility.TransitionImage(Image.VkImage, Layout, newLayout, _stage, dstStage, _access, dstAccess, aspect, cmd);
+
+        ImageUtility.TransitionImage(Image.VkImage, oldLayout, newLayout, _stage, dstStage, _access, dstAccess, aspect,
+            cmd);
 
         Layout = newLayout;
         _stage = dstStage;

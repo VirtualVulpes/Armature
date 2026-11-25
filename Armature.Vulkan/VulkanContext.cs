@@ -72,7 +72,7 @@ public sealed class VulkanContext : IDisposable
         var priority = 1.0f;
 
         var vulkan12Features = new VkPhysicalDeviceVulkan12Features
-            { ShaderSampledImageArrayNonUniformIndexing = true, DescriptorBindingPartiallyBound = true };
+            { ShaderSampledImageArrayNonUniformIndexing = true, DescriptorBindingPartiallyBound = true, RuntimeDescriptorArray = true};
         var vulkan13Features = new VkPhysicalDeviceVulkan13Features
             { DynamicRendering = true, Next = &vulkan12Features };
         var physicalFeatures = new VkPhysicalDeviceFeatures2()

@@ -32,8 +32,8 @@ public static class EditorPipelines
         m.Add("Outline Composite", "fullscreen.vert", "outline_composite.frag", new MeshPipelineOptions
         {
             ColorFormat = ctx.ColorFormat,
-            FragmentPushSize = ByteSize.Zero,
-            Layouts = [editor.OutlineCompositeLayout]
+            FragmentPushSize = ByteSize.Of<int>() * 2,
+            Layouts = [core.GlobalLayout]
         });
         
         c.Add("Seed Init", "seed_init.comp", new ComputePipelineOptions

@@ -19,20 +19,10 @@ public class SelectionMaskPass : IRenderPass
         _editor = editor;
     }
 
-    public unsafe void Record(in RenderContext ctx, ReadOnlySpan<RenderItem> renderObjects)
+    public unsafe void Record(in RenderContext ctx, ReadOnlySpan<RenderItem> items)
     {
-        _editor.SelectionMask.Image.TransitionTo(ctx.CommandBuffer,
-            VkImageLayout.ColorAttachmentOptimal, VkPipelineStageFlags.ColorAttachmentOutputBit,
-            VkAccessFlags.ColorAttachmentWriteBit);
-
-        var colorAttachment = new VkRenderingAttachmentInfo
-        {
-            ImageView = _editor.SelectionMask.View.VkImageView,
-            ImageLayout = VkImageLayout.ColorAttachmentOptimal,
-            LoadOp = VkAttachmentLoadOp.Clear,
-            StoreOp = VkAttachmentStoreOp.Store,
-            ClearValue = new VkClearColorValue { Float32 = float4.Zero }
-        };
+        var colorAttachment = _editor.SelectionMask.AsColorAttachment(ctx.CommandBuffer,
+            clear: new VkClearColorValue { Float32 = float4.Zero });
 
         ctx.CommandBuffer.BeginRendering(
             new VkRenderingInfo
@@ -62,20 +52,20 @@ public class SelectionMaskPass : IRenderPass
             .BindDescriptorSets(VkPipelineBindPoint.Graphics, _pipeline.Layout, 0, [ctx.GlobalDescriptorSet],
                 null);
 
-        foreach (var renderObject in renderObjects)
+        foreach (var item in items)
         {
-            if ((renderObject.Flags & RenderFlags.Selected) == 0) continue;
+            if ((item.Flags & RenderFlags.Selected) == 0) continue;
 
             var pushConsts = new PushConstantBlocks.VertexBlock
             {
-                Mvp = renderObject.ModelMatrix * ctx.ViewProj,
-                Model = renderObject.ModelMatrix
+                Mvp = item.ModelMatrix * ctx.ViewProj,
+                Model = item.ModelMatrix
             };
 
             ctx.CommandBuffer.PushConstants(_pipeline.Layout, VkShaderStageFlags.VertexBit, ByteSize.Zero,
                 pushConsts);
 
-            var gpuMesh = renderObject.GpuMesh;
+            var gpuMesh = item.GpuMesh;
 
             ctx.CommandBuffer.BindVertexBuffers(0, [gpuMesh.VertexBuffer], [new ByteSize64(0)]);
             ctx.CommandBuffer.BindIndexBuffer(gpuMesh.IndexBuffer, new ByteSize64(0), VkIndexType.UInt32);

@@ -16,5 +16,5 @@ public readonly struct RenderItem
     public TextureId TextureId { get; init; }
     public RenderFlags Flags { get; init; }
     
-    public uint ItemId { get; init; }
+    public uint Id { get; init; }
 }

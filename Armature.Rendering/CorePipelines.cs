@@ -33,5 +33,11 @@ public static class CorePipelines
         b.Add("Wireframe", "default.vert", "flat_color.frag", Options(col, VkPolygonMode.Line));
         b.Add("Phong Texture", "world_space.vert", "phong_texture.frag", Options(tex));
         b.Add("Phong Color", "world_space.vert", "phong_color.frag", Options(col));
+        b.Add("Present", "fullscreen.vert", "present.frag", new MeshPipelineOptions
+        {
+            ColorFormat = ctx.ColorFormat,
+            FragmentPushSize = ByteSize.Of<int>(),
+            Layouts = [descriptors.GlobalLayout]
+        });    
     }
 }

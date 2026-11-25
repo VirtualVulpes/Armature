@@ -21,11 +21,8 @@ public class SeedInitPass : IRenderPass, IEditorTargetConsumer
 
     public void Record(in RenderContext ctx, ReadOnlySpan<RenderItem> _)
     {
-        _targets.SelectionMask.Image.TransitionTo(ctx.CommandBuffer, VkImageLayout.General,
-            VkPipelineStageFlags.ComputeShaderBit, VkAccessFlags.ShaderReadBit);
-
-        _targets.SeedA.Image.TransitionTo(ctx.CommandBuffer, VkImageLayout.General,
-            VkPipelineStageFlags.ComputeShaderBit, VkAccessFlags.ShaderWriteBit);
+        _targets.SelectionMask.AsStorageRead(ctx.CommandBuffer);
+        _targets.SeedA.AsStorage(ctx.CommandBuffer, discard: true);
 
         ctx.CommandBuffer.BindPipeline(VkPipelineBindPoint.Compute, _pipeline.Handle);
         ctx.CommandBuffer

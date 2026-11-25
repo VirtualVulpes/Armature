@@ -10,6 +10,7 @@ public sealed class CoreDescriptors : IDisposable
 
     private DescriptorPoolEx _descriptorPool;
     private VkSampler _textureSampler;
+    private VkSampler _targetSampler;
 
     public VkDescriptorSet GlobalSet { get; private set; }
 
@@ -22,10 +23,10 @@ public sealed class CoreDescriptors : IDisposable
 
         CreateDescriptorPool();
         CreateTextureSampler();
+        CreateTargetSampler();
 
         CreateGlobalSet();
         CreatePerFrameSet();
-
     }
 
     private void CreateDescriptorPool()
@@ -133,6 +134,32 @@ public sealed class CoreDescriptors : IDisposable
         PerFrameLayout = _context.Device.CreateDescriptorSetLayout(layoutInfo, null);
     }
 
+    public unsafe void RegisterTarget(RenderTarget target, int slot)
+    {
+        target.BindlessIndex = RenderConstants.RenderTargetBase + slot;
+
+        var imageInfo = new VkDescriptorImageInfo
+        {
+            Sampler = _targetSampler,
+            ImageView = target.View.VkImageView,
+            ImageLayout = VkImageLayout.ShaderReadOnlyOptimal
+        };
+
+        ReadOnlySpan<VkWriteDescriptorSet> writes =
+        [
+            new()
+            {
+                DstSet = GlobalSet,
+                DstBinding = 0,
+                DstArrayElement = target.BindlessIndex,
+                DescriptorCount = 1,
+                DescriptorType = VkDescriptorType.CombinedImageSampler,
+                ImageInfo = &imageInfo
+            }
+        ];
+        _context.Device.UpdateDescriptorSets(writes, null);
+    }
+
     public unsafe void UpdateTextureDescriptor(Texture texture)
     {
         var imageInfo = new VkDescriptorImageInfo
@@ -161,7 +188,7 @@ public sealed class CoreDescriptors : IDisposable
     {
         return _context.Device.AllocateDescriptorSet(_descriptorPool, PerFrameLayout);
     }
-    
+
     private void CreateTextureSampler()
     {
         var samplerInfo = new VkSamplerCreateInfo
@@ -185,11 +212,29 @@ public sealed class CoreDescriptors : IDisposable
 
         _textureSampler = _context.Device.CreateSampler(samplerInfo, null);
     }
+    
+    private void CreateTargetSampler()
+    {
+        var samplerInfo = new VkSamplerCreateInfo
+        {
+            MagFilter = VkFilter.Nearest,
+            MinFilter = VkFilter.Nearest,
+            MipmapMode = VkSamplerMipmapMode.Nearest,
+            AddressModeU = VkSamplerAddressMode.ClampToEdge,
+            AddressModeV = VkSamplerAddressMode.ClampToEdge,
+            AddressModeW = VkSamplerAddressMode.ClampToEdge,
+            AnisotropyEnable = false,
+            MaxLod = 0.0f
+        };
+
+        _targetSampler = _context.Device.CreateSampler(samplerInfo, null);
+    }
 
     public void Dispose()
     {
         _context.Device.DestroyDescriptorPool(_descriptorPool, null);
         _context.Device.DestroySampler(_textureSampler, null);
+        _context.Device.DestroySampler(_targetSampler, null);
 
         _context.Device.DestroyDescriptorSetLayout(GlobalLayout, null);
         _context.Device.DestroyDescriptorSetLayout(PerFrameLayout, null);

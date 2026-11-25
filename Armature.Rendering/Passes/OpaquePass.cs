@@ -1,7 +1,6 @@
 using Armature.Core;
 using Armature.Vulkan;
 using Brutal;
-using Brutal.Numerics;
 using Brutal.VulkanApi;
 using Brutal.VulkanApi.Abstractions;
 
@@ -9,45 +8,13 @@ namespace Armature.Rendering.Passes;
 
 public sealed class OpaquePass : IRenderPass
 {
-    public unsafe void Record(in RenderContext ctx, ReadOnlySpan<RenderItem> renderObjects)
+    public unsafe void Record(in RenderContext ctx, ReadOnlySpan<RenderItem> items)
     {
-        ctx.Targets.Color.Image.TransitionTo(ctx.CommandBuffer, VkImageLayout.ColorAttachmentOptimal,
-            VkPipelineStageFlags.ColorAttachmentOutputBit, VkAccessFlags.ColorAttachmentWriteBit);
-        
-        ctx.Targets.ResolvedColor.Image.TransitionTo(ctx.CommandBuffer, VkImageLayout.ColorAttachmentOptimal,
-            VkPipelineStageFlags.ColorAttachmentOutputBit, VkAccessFlags.ColorAttachmentWriteBit);
-        
-        ctx.Targets.Depth.Image.TransitionTo(ctx.CommandBuffer, VkImageLayout.DepthAttachmentOptimal,
-            VkPipelineStageFlags.EarlyFragmentTestsBit | VkPipelineStageFlags.LateFragmentTestsBit, VkAccessFlags.DepthStencilAttachmentWriteBit, VkImageAspectFlags.DepthBit);
-        
-        ctx.Targets.ResolvedDepth.Image.TransitionTo(ctx.CommandBuffer, VkImageLayout.DepthAttachmentOptimal,
-            VkPipelineStageFlags.EarlyFragmentTestsBit, VkAccessFlags.DepthStencilAttachmentWriteBit, VkImageAspectFlags.DepthBit);
-        
-        var colorAttachment = new VkRenderingAttachmentInfo
-        {
-            ImageView = ctx.Targets.Color.View.VkImageView,
-            ImageLayout = VkImageLayout.ColorAttachmentOptimal,
-            LoadOp = VkAttachmentLoadOp.Clear,
-            StoreOp = VkAttachmentStoreOp.Store,
-            ClearValue = new VkClearColorValue { Float32 = new float4(0.01f, 0.01f, 0.01f, 1.0f) },
-            
-            ResolveMode = VkResolveModeFlags.AverageBit,
-            ResolveImageView = ctx.Targets.ResolvedColor.View.VkImageView,
-            ResolveImageLayout = VkImageLayout.ColorAttachmentOptimal
-        };
+        var cmd = ctx.CommandBuffer;
+        var t = ctx.Targets;
 
-        var depthAttachment = new VkRenderingAttachmentInfo
-        {
-            ImageView = ctx.Targets.Depth.View.VkImageView,
-            ImageLayout = VkImageLayout.DepthAttachmentOptimal,
-            LoadOp = VkAttachmentLoadOp.Clear,
-            StoreOp = VkAttachmentStoreOp.DontCare,
-            ClearValue = new VkClearDepthStencilValue { Depth = 1.0f, Stencil = 0 },
-            
-            ResolveMode = VkResolveModeFlags.SampleZeroBit,
-            ResolveImageView = ctx.Targets.ResolvedDepth.View.VkImageView,
-            ResolveImageLayout = VkImageLayout.DepthAttachmentOptimal
-        };
+        var colorAttachment = t.Color.AsColorAttachment(cmd, resolve: t.ResolvedColor, overwritesAll: false);
+        var depthAttachment = t.Depth.AsDepthAttachment(cmd, resolve: t.ResolvedDepth, store: false);
 
         ctx.CommandBuffer.BeginRendering(
             new VkRenderingInfo
@@ -76,12 +43,12 @@ public sealed class OpaquePass : IRenderPass
         var cachedPipelineId = PipelineId.Invalid;
         Pipeline? pipeline = null;
 
-        foreach (var renderObject in renderObjects)
+        foreach (var item in items)
         {
-            if (cachedPipelineId != renderObject.Pipeline.Id)
+            if (cachedPipelineId != item.Pipeline.Id)
             {
-                cachedPipelineId = renderObject.Pipeline.Id;
-                pipeline = renderObject.Pipeline;
+                cachedPipelineId = item.Pipeline.Id;
+                pipeline = item.Pipeline;
 
                 ctx.CommandBuffer.BindPipeline(VkPipelineBindPoint.Graphics, pipeline.Handle);
                 ctx.CommandBuffer
@@ -91,19 +58,19 @@ public sealed class OpaquePass : IRenderPass
 
             var pushConsts = new PushConstantBlocks.VertexBlock
             {
-                Mvp = renderObject.ModelMatrix * ctx.ViewProj,
-                Model = renderObject.ModelMatrix
+                Mvp = item.ModelMatrix * ctx.ViewProj,
+                Model = item.ModelMatrix
             };
 
             ctx.CommandBuffer.PushConstants(pipeline.Layout, VkShaderStageFlags.VertexBit, ByteSize.Zero,
                 pushConsts);
 
-            switch (renderObject.DataType)
+            switch (item.DataType)
             {
                 case RenderDataType.Color:
                     var colorFrag = new PushConstantBlocks.ColorFragmentBlock
                     {
-                        Color = renderObject.Color
+                        Color = item.Color
                     };
                     ctx.CommandBuffer.PushConstants(pipeline.Layout, VkShaderStageFlags.FragmentBit,
                         ByteSize.Of<PushConstantBlocks.VertexBlock>(), colorFrag);
@@ -111,7 +78,7 @@ public sealed class OpaquePass : IRenderPass
                 case RenderDataType.Texture:
                     var textureFrag = new PushConstantBlocks.TextureFragmentBlock
                     {
-                        TextureId = renderObject.TextureId.Value,
+                        TextureId = item.TextureId.Value,
                     };
 
                     ctx.CommandBuffer.PushConstants(pipeline.Layout, VkShaderStageFlags.FragmentBit,
@@ -119,7 +86,7 @@ public sealed class OpaquePass : IRenderPass
                     break;
             }
 
-            var gpuMesh = renderObject.GpuMesh;
+            var gpuMesh = item.GpuMesh;
 
             ctx.CommandBuffer.BindVertexBuffers(0, [gpuMesh.VertexBuffer], [new ByteSize64(0)]);
             ctx.CommandBuffer.BindIndexBuffer(gpuMesh.IndexBuffer, new ByteSize64(0), VkIndexType.UInt32);

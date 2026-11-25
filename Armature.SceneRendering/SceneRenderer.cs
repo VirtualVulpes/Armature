@@ -165,13 +165,13 @@ public sealed class SceneRenderer : IFrameListener, IDisposable
                     Color = o.Color,
                     DataType = o.DataType,
                     Flags = o.Flags,
-                    ItemId = o.ObjectId
+                    Id = o.ObjectId
                 }
             );
         }
     }
 
-    public void OnPrepare(ref RenderContext ctx)
+    public void OnPrepare(RenderContext ctx)
     {
         var r = _resources[ctx.FrameIndex];
         UpdateLights(r, _lights.AsSpan(0, _lightCount));

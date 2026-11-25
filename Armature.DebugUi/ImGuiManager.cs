@@ -625,7 +625,7 @@ public sealed class ImGuiManager : IDisposable, IFrameListener, IUiCaptureState
         UpdateDisplaySize();
     }
 
-    public void OnPrepare(ref RenderContext ctx)
+    public void OnPrepare(RenderContext ctx)
     {
         RenderFrame(ctx.FrameIndex);
     }

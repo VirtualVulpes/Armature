@@ -1,12 +1,9 @@
-using Armature.Core;
 using Armature.Rendering.Passes;
 using Armature.Vulkan;
-using Brutal;
 using Brutal.GlfwApi;
 using Brutal.Numerics;
 using Brutal.VulkanApi;
 using Brutal.VulkanApi.Abstractions;
-using CommunityToolkit.HighPerformance;
 
 namespace Armature.Rendering;
 
@@ -63,6 +60,15 @@ public sealed class Renderer : IDisposable
 
         Swapchain = new Swapchain(_context, _window);
         Targets = new RenderTargets(context.Allocator, Swapchain.SurfaceFormat.Format, Swapchain.Extent, MsaaSamples);
+        RegisterCoreTargets();
+    }
+
+    private void RegisterCoreTargets()
+    {
+        _coreDescriptors.RegisterTarget(Targets.ResolvedColor, 0);
+        _coreDescriptors.RegisterTarget(Targets.ResolvedDepth, 1);
+        _coreDescriptors.RegisterTarget(Targets.PostProcessA, 2);
+        _coreDescriptors.RegisterTarget(Targets.PostProcessB, 3);
     }
 
     public void AddPass(IRenderPass pass, RenderPhase phase)
@@ -92,6 +98,7 @@ public sealed class Renderer : IDisposable
 
         Targets.Dispose();
         Targets = new RenderTargets(_context.Allocator, Swapchain.SurfaceFormat.Format, Swapchain.Extent, MsaaSamples);
+        RegisterCoreTargets();
         NotifyTargetsRecreated();
         
         foreach (var l in _listeners) l.OnResize(Targets);
@@ -152,7 +159,7 @@ public sealed class Renderer : IDisposable
             throw new InvalidOperationException($"Failed to acquire swapchain image: {result}");
 
         _frameResources[_frameIndex].CommandBuffer.Reset();
-
+        
         return true;
     }
 
@@ -169,6 +176,7 @@ public sealed class Renderer : IDisposable
             FrameIndex = _frameIndex,
             ViewProj = viewProj
         };
+        context.BeginFrame();
 
         r.CommandBuffer.Begin(VkCommandBufferUsageFlags.OneTimeSubmitBit);
 
@@ -184,11 +192,11 @@ public sealed class Renderer : IDisposable
             r.CommandBuffer
         );
 
-        foreach (var l in _listeners) l.OnPrepare(ref context);
-        
+        foreach (var l in _listeners) l.OnPrepare(context);
+
         foreach (var (_, pass) in _passes)
         {
-            pass.Record(context, items);
+             pass.Record(context, items);
         }
 
         foreach (var l in _listeners) l.OnPostRecord(context);

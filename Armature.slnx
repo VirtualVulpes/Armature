@@ -7,5 +7,6 @@
   <Project Path="Armature.Rendering/Armature.Rendering.csproj" />
   <Project Path="Armature.Scene/Armature.Scene.csproj" />
   <Project Path="Armature.SceneRendering/Armature.SceneRendering.csproj" />
+  <Project Path="Armature.Tests/Armature.Tests.csproj" />
   <Project Path="Armature.Vulkan/Armature.Vulkan.csproj" />
 </Solution>

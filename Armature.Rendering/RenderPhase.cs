@@ -5,5 +5,6 @@ public enum RenderPhase
     PreScene,
     Scene,
     PostScene,
-    Overlay
+    Overlay,
+    Present
 }
