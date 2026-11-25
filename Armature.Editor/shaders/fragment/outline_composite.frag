@@ -7,7 +7,7 @@ layout(set = 0, binding = 0) uniform sampler2D  textures[];
 layout(set = 0, binding = 0) uniform isampler2D itextures[];
 
 layout(push_constant) uniform Push {
-    int sceneIndex;
+    layout(offset = 128) int sceneIndex;
     int seedIndex;
 } pc;
 
