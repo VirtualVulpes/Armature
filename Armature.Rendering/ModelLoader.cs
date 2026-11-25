@@ -8,7 +8,7 @@ public static class ModelLoader
 {
     public static Mesh LoadModel(String fileName)
     {
-        var filePath = Path.Join("models", fileName);
+        var filePath = Path.Join(AppContext.BaseDirectory, "models", fileName);
 
         var loader = new GltfLoader(filePath);
         

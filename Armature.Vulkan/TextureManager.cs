@@ -29,7 +29,7 @@ public sealed class TextureManager : IDisposable
     private unsafe Texture LoadTexture(String fileName, CommandBuffer commandBuffer, VmaAllocator allocator,
         TextureColorSpace colorSpace, TextureId id)
     {
-        var filePath = Path.Join("textures", fileName);
+        var filePath = Path.Join(AppContext.BaseDirectory, "textures", fileName);
         KtxErrorCode result =
             KtxTexture.CreateFromNamedFile(Encoding.UTF8.GetBytes(filePath), KtxTextureCreateFlagBits.LoadImageDataBit,
                 out var image);
