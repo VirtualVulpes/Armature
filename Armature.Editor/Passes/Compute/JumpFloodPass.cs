@@ -11,16 +11,16 @@ namespace Armature.Editor.Passes.Compute;
 public class JumpFloodPass : IRenderPass, IEditorTargetConsumer
 {
     private readonly Pipeline _pipeline;
-    private EditorDescriptors _editor;
+    private readonly EditorDescriptors _editor;
     private readonly VkDescriptorSet _bToASet;
     private readonly VkDescriptorSet _aToBSet;
     private EditorTargets _targets;
 
-    private const UInt32 StartJump = 2;
+    private const uint StartJump = 2;
 
     public JumpFloodPass(Pipeline pipeline, EditorDescriptors editor)
     {
-        Debug.Assert((UInt32.Log2(StartJump) + 1) % 2 == 0,
+        Debug.Assert((uint.Log2(StartJump) + 1) % 2 == 0,
             "Jump flood needs an even pass count so the result ends in SeedA");
 
         _pipeline = pipeline;
@@ -74,8 +74,8 @@ public class JumpFloodPass : IRenderPass, IEditorTargetConsumer
             context.CommandBuffer.PushConstants(_pipeline.Layout, VkShaderStageFlags.ComputeBit, ByteSize.Zero,
                 pushConsts);
 
-            const Int32 localSizeX = 16;
-            const Int32 localSizeY = 16;
+            const int localSizeX = 16;
+            const int localSizeY = 16;
 
             context.CommandBuffer.Dispatch((context.Targets.Extent.Width + localSizeX - 1) / localSizeX,
                 (context.Targets.Extent.Height + localSizeY - 1) / localSizeY, 1);

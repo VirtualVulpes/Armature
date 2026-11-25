@@ -12,25 +12,25 @@ namespace Armature.Vulkan;
 
 public sealed class TextureManager : IDisposable
 {
-    private UInt32 _nextId;
+    private uint _nextId;
 
     private readonly Dictionary<TextureId, Texture> _textures = new();
-    private readonly Dictionary<String, TextureId> _names = new();
+    private readonly Dictionary<string, TextureId> _names = new();
 
     private readonly List<BufferEx> _pendingStagingBuffers = [];
 
-    private readonly Boolean _supportsBc7;
+    private readonly bool _supportsBc7;
 
-    public TextureManager(Boolean supportsBc7)
+    public TextureManager(bool supportsBc7)
     {
         _supportsBc7 = supportsBc7;
     }
 
-    private unsafe Texture LoadTexture(String fileName, CommandBuffer commandBuffer, VmaAllocator allocator,
+    private unsafe Texture LoadTexture(string fileName, CommandBuffer commandBuffer, VmaAllocator allocator,
         TextureColorSpace colorSpace, TextureId id)
     {
         var filePath = Path.Join(AppContext.BaseDirectory, "textures", fileName);
-        KtxErrorCode result =
+        var result =
             KtxTexture.CreateFromNamedFile(Encoding.UTF8.GetBytes(filePath), KtxTextureCreateFlagBits.LoadImageDataBit,
                 out var image);
 
@@ -67,7 +67,7 @@ public sealed class TextureManager : IDisposable
         }
 
         var imageSize = ktx2.GetDataSize();
-        var numLevels = (Int32)ktx2.NumLevels;
+        var numLevels = (int)ktx2.NumLevels;
 
         var bufferInfo = new BufferEx.CreateInfo
         {
@@ -91,8 +91,8 @@ public sealed class TextureManager : IDisposable
             ImageFormat = format,
             ImageExtent = new VkExtent3D
             {
-                Width = (Int32)ktx2.BaseWidth,
-                Height = (Int32)ktx2.BaseHeight,
+                Width = (int)ktx2.BaseWidth,
+                Height = (int)ktx2.BaseHeight,
                 Depth = 1
             },
             ImageMipLevels = numLevels,
@@ -123,10 +123,10 @@ public sealed class TextureManager : IDisposable
 
         for (var i = 0; i < ktx2.NumLevels; i++)
         {
-            var width = Int32.Max(1, (Int32)ktx2.BaseWidth >> i);
-            var height = Int32.Max(1, (Int32)ktx2.BaseHeight >> i);
+            var width = int.Max(1, (int)ktx2.BaseWidth >> i);
+            var height = int.Max(1, (int)ktx2.BaseHeight >> i);
 
-            ktx2.GetImageOffset((UInt32)i, 0, 0, out var offset);
+            ktx2.GetImageOffset((uint)i, 0, 0, out var offset);
 
             regions[i] = new VkBufferImageCopy
             {
@@ -174,7 +174,7 @@ public sealed class TextureManager : IDisposable
         return new Texture(textureImage, textureImageView, id);
     }
 
-    public TextureId AddTexture(String fileName, CommandBuffer commandBuffer, VmaAllocator allocator,
+    public TextureId AddTexture(string fileName, CommandBuffer commandBuffer, VmaAllocator allocator,
         TextureColorSpace colorSpace)
     {
         var textureId = new TextureId(_nextId++);
@@ -194,7 +194,7 @@ public sealed class TextureManager : IDisposable
         return _textures[textureId];
     }
 
-    public TextureId GetTextureId(String name)
+    public TextureId GetTextureId(string name)
     {
         return _names[name];
     }

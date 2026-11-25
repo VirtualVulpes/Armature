@@ -12,10 +12,10 @@ public enum LightType
 public record struct LightComponent
 {
     public float3 Color;
-    public Single Intensity;
-    public Single Range;
+    public float Intensity;
+    public float Range;
     public float3 Direction;
     public LightType Type;
-    public Single InnerCos;
-    public Single OuterCos;
+    public float InnerCos;
+    public float OuterCos;
 }

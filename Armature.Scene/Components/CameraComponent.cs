@@ -2,8 +2,8 @@ namespace Armature.Scene.Components;
 
 public struct CameraComponent
 {
-    public Single AspectRatio;
-    public Single Fov;
-    public Single ZNear;
-    public Single ZFar;
+    public float AspectRatio;
+    public float Fov;
+    public float ZNear;
+    public float ZFar;
 }

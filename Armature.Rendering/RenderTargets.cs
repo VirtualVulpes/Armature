@@ -7,11 +7,11 @@ public sealed class RenderTargets : IDisposable
 {
     public VkExtent2D Extent { get; }
     
-    public RenderTarget Color;
-    public RenderTarget ResolvedColor;
-    public RenderTarget Depth;
-    public RenderTarget ResolvedDepth;
-    public RenderTarget PostProcess;
+    public readonly RenderTarget Color;
+    public readonly RenderTarget ResolvedColor;
+    public readonly RenderTarget Depth;
+    public readonly RenderTarget ResolvedDepth;
+    public readonly RenderTarget PostProcess;
     
     public RenderTargets(VmaAllocator allocator, VkFormat swapchainFormat, VkExtent2D extent, VkSampleCountFlags msaa)
     {

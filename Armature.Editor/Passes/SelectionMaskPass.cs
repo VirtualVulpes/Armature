@@ -10,8 +10,8 @@ namespace Armature.Editor.Passes;
 
 public class SelectionMaskPass : IRenderPass
 {
-    private Pipeline _pipeline;
-    private EditorTargets _editor;
+    private readonly Pipeline _pipeline;
+    private readonly EditorTargets _editor;
     
     public SelectionMaskPass(Pipeline pipeline, EditorTargets editor)
     {

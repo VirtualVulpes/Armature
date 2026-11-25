@@ -1,6 +1,4 @@
-using Armature.Core;
 using Armature.Scene.Components;
-using Brutal.Numerics;
 
 namespace Armature.Scene;
 

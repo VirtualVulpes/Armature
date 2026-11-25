@@ -1,11 +1,11 @@
 namespace Armature.Scene;
 
-public readonly record struct EntityId(UInt32 Value)
+public readonly record struct EntityId(uint Value)
 {
-    public static readonly EntityId Invalid = new(UInt32.MaxValue);
+    public static readonly EntityId Invalid = new(uint.MaxValue);
 }
 
-public readonly record struct Entity(EntityId Id, UInt32 Generation)
+public readonly record struct Entity(EntityId Id, uint Generation)
 {
     public static readonly Entity Invalid = new Entity
     {
@@ -13,8 +13,6 @@ public readonly record struct Entity(EntityId Id, UInt32 Generation)
         Generation = 0
     };
 
-    public override String ToString()
-    {
-        return $"Entity({Id.Value},{Generation})";
-    }
+    public override string ToString() => $"Entity({Id.Value},{Generation})";
+    
 }

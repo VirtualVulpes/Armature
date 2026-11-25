@@ -27,7 +27,7 @@ public sealed class Inspector
         Register<PipelineComponent>("Pipeline", DrawPipeline);
     }
 
-    private void Register<T>(String name, RefAction<T> draw) where T : struct
+    private void Register<T>(string name, RefAction<T> draw) where T : struct
     {
         _drawers[typeof(T)] = new ComponentDrawer<T>(name, draw);
     }
@@ -39,7 +39,7 @@ public sealed class Inspector
         
         ImGui.Begin("Inspector"u8, ImGuiWindowFlags.AlwaysAutoResize);
 
-        ImGui.PushID((Int32)e.Id.Value);
+        ImGui.PushID((int)e.Id.Value);
         foreach (var drawer in _drawers.Values)
         {
             drawer.Draw(_world, e);
@@ -49,7 +49,7 @@ public sealed class Inspector
         ImGui.End();
     }
 
-    private static Boolean EnumCombo<T>(String label, ref T value) where T : struct, Enum
+    private static bool EnumCombo<T>(string label, ref T value) where T : struct, Enum
     {
         var changed = false;
 
@@ -126,7 +126,7 @@ public sealed class Inspector
     private void DrawCamera(ref CameraComponent c)
     {
         ImGui.Text($"Aspect Ratio {c.AspectRatio}");
-        ImGui.Text($"FOV {Single.RadiansToDegrees(c.Fov)}");
+        ImGui.Text($"FOV {float.RadiansToDegrees(c.Fov)}");
         ImGui.Text($"Z Near {c.ZNear}");
         ImGui.Text($"Z Far {c.ZFar}");
     }

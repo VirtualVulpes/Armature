@@ -14,7 +14,7 @@ public sealed class RenderContext
     public VkDescriptorSet GlobalDescriptorSet { get; init; }
     public VkDescriptorSet PerFrameDescriptorSet { get; set; }
 
-    public Int32 FrameIndex { get; init; }
+    public int FrameIndex { get; init; }
 
     public CommandBuffer CommandBuffer => FrameResources.CommandBuffer;
     

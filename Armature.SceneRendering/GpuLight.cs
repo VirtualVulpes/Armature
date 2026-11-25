@@ -10,23 +10,23 @@ public record struct GpuLight
     public float3 Position;
     
     [FieldOffset(12)]
-    public Single Intensity;
+    public float Intensity;
     
     [FieldOffset(16)]
     public float3 Color;
     
     [FieldOffset(28)]
-    public Single Range;
+    public float Range;
     
     [FieldOffset(32)]
     public float3 Direction;
     
     [FieldOffset(44)]
-    public Int32 Type;
+    public int Type;
     
     [FieldOffset(48)]
-    public Single InnerCos;
+    public float InnerCos;
     
     [FieldOffset(52)]
-    public Single OuterCos;
+    public float OuterCos;
 }

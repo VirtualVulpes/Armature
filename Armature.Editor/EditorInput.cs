@@ -27,7 +27,7 @@ public sealed class EditorInput
         var wantKeyboard = _input.IsUiCapturingKeyboard();
 
         var canPick = _input.InputMode == InputMode.UiInteraction && !wantMouse;
-        _picker.Request(canPick ? new int2((Int32)_input.CursorPos.X, (Int32)_input.CursorPos.Y) : null);
+        _picker.Request(canPick ? new int2((int)_input.CursorPos.X, (int)_input.CursorPos.Y) : null);
 
         switch (_input.InputMode)
         {

@@ -23,7 +23,7 @@ public class SystemManager
         }
     }
 
-    public void Update(Single deltaTime)
+    public void Update(float deltaTime)
     {
         foreach (var system in _systems)
         {

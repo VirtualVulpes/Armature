@@ -5,9 +5,9 @@ namespace Armature.SceneRendering;
 public sealed class SceneData
 {
     public RenderObject[] Objects = [];
-    public Int32 ObjectCount;
+    public int ObjectCount;
     public GpuLight[] Lights = [];
-    public Int32 LightCount;
+    public int LightCount;
     public GpuCamera Camera;
 
     public ReadOnlySpan<RenderObject> ObjectSpan => Objects.AsSpan(0, ObjectCount);

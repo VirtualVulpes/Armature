@@ -6,7 +6,7 @@ namespace Armature.Rendering;
 
 public static class ModelLoader
 {
-    public static Mesh LoadModel(String fileName)
+    public static Mesh LoadModel(string fileName)
     {
         var filePath = Path.Join(AppContext.BaseDirectory, "models", fileName);
 
@@ -14,15 +14,15 @@ public static class ModelLoader
         
         var positionAccessor = loader.GltfJson.Meshes[0].Primitives[0].Attributes["POSITION"];
         var positionData = loader.GetAccessorBufferSpan(positionAccessor);
-        var positions = MemoryMarshal.Cast<Byte, float3>(positionData).ToArray();
+        var positions = MemoryMarshal.Cast<byte, float3>(positionData).ToArray();
         
         var normalAccessor = loader.GltfJson.Meshes[0].Primitives[0].Attributes["NORMAL"];
         var normalData = loader.GetAccessorBufferSpan(normalAccessor);
-        var normals = MemoryMarshal.Cast<Byte, float3>(normalData).ToArray();
+        var normals = MemoryMarshal.Cast<byte, float3>(normalData).ToArray();
 
         var uvAccessor = loader.GltfJson.Meshes[0].Primitives[0].Attributes["TEXCOORD_0"];
         var uvData = loader.GetAccessorBufferSpan(uvAccessor);
-        var uvs = MemoryMarshal.Cast<Byte, float2>(uvData).ToArray();
+        var uvs = MemoryMarshal.Cast<byte, float2>(uvData).ToArray();
         
         var vertices = new Vertex[positions.Length];
         
@@ -40,13 +40,13 @@ public static class ModelLoader
         var indexAccessor = loader.GltfJson.Accessors[indexAccessorIndex];
         var indexData = loader.GetAccessorBufferSpan(indexAccessorIndex);
 
-        var indices = new UInt32[indexAccessor.Count];
+        var indices = new uint[indexAccessor.Count];
 
-        switch ((Int32)indexAccessor.ComponentType)
+        switch ((int)indexAccessor.ComponentType)
         {
             case 5121:
             {
-                var data = MemoryMarshal.Cast<Byte, Byte>(indexData);
+                var data = MemoryMarshal.Cast<byte, byte>(indexData);
 
                 for (var i = 0; i < indices.Length; i++)
                 {
@@ -58,7 +58,7 @@ public static class ModelLoader
 
             case 5123:
             {
-                var data = MemoryMarshal.Cast<Byte, UInt16>(indexData);
+                var data = MemoryMarshal.Cast<byte, ushort>(indexData);
                 
                 for (var i = 0; i < indices.Length; i++)
                 {
@@ -70,7 +70,7 @@ public static class ModelLoader
 
             case 5125:
             {
-                var data = MemoryMarshal.Cast<Byte, UInt32>(indexData);
+                var data = MemoryMarshal.Cast<byte, uint>(indexData);
                 
                 data[..indices.Length].CopyTo(indices);
                 

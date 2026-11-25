@@ -22,4 +22,9 @@ public static class TransformUtility
 
         return (yaw, pitch);
     }
+    
+    public static float3 TransformDirection(float3 localDir, float4x4 world)
+    {
+        return float3.NormalizeOrZero(float3.TransformNormal(localDir, world));
+    }
 }

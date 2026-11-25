@@ -8,7 +8,7 @@ namespace Armature.Editor.Passes.Compute;
 public class SeedInitPass : IRenderPass, IEditorTargetConsumer
 {
     private readonly Pipeline _pipeline;
-    private EditorDescriptors _editor;
+    private readonly EditorDescriptors _editor;
     private readonly VkDescriptorSet _descriptorSet;
     private EditorTargets _targets;
 
@@ -33,8 +33,8 @@ public class SeedInitPass : IRenderPass, IEditorTargetConsumer
                 [_descriptorSet],
                 null);
 
-        const Int32 localSizeX = 16;
-        const Int32 localSizeY = 16;
+        const int localSizeX = 16;
+        const int localSizeY = 16;
 
         ctx.CommandBuffer.Dispatch((ctx.Targets.Extent.Width + localSizeX - 1) / localSizeX,
             (ctx.Targets.Extent.Height + localSizeY - 1) / localSizeY, 1);

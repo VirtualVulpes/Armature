@@ -13,11 +13,11 @@ public class CameraController
     private readonly InputManager _inputManager;
     private readonly CameraSystem _cameraSystem;
 
-    private Single _yaw;
-    private Single _pitch;
+    private float _yaw;
+    private float _pitch;
 
-    private const Single Speed = 5.0f;
-    private const Single Sensitivity = 0.001f;
+    private const float Speed = 5.0f;
+    private const float Sensitivity = 0.001f;
     
     public CameraController(World world, InputManager inputManager, CameraSystem cameraSystem)
     {
@@ -28,7 +28,7 @@ public class CameraController
         SetYawPitch();
     }
     
-    public void Update(Single deltaTime)
+    public void Update(float deltaTime)
     {
         if (_inputManager.InputMode != InputMode.CameraControl) return;
 
@@ -67,8 +67,8 @@ public class CameraController
         // Camera rotation
         var mouseDelta = _inputManager.CursorDelta;
 
-        _yaw -= (Single)mouseDelta.X * Sensitivity;
-        _pitch = Single.Clamp(_pitch - (Single)mouseDelta.Y * Sensitivity, Single.DegreesToRadians(-89.0f), Single.DegreesToRadians(89.0f));
+        _yaw -= (float)mouseDelta.X * Sensitivity;
+        _pitch = float.Clamp(_pitch - (float)mouseDelta.Y * Sensitivity, float.DegreesToRadians(-89.0f), float.DegreesToRadians(89.0f));
 
         var yawRotation = floatQuat.CreateFromAxisAngle(float3.UnitY, _yaw);
         var pitchRotation = floatQuat.CreateFromAxisAngle(float3.UnitX, _pitch);

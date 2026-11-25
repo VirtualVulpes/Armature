@@ -27,9 +27,9 @@ public sealed class Swapchain : IDisposable
 
     public VkExtent2D Extent { get; private set; }
 
-    public VkImage Image(Int32 index) => _swapchainImages[index];
-    public VkImageView ImageView(Int32 index) => _swapchainImageViews[index];
-    public VkSemaphore RenderFinished(Int32 index) => _renderFinished[index];
+    public VkImage Image(int index) => _swapchainImages[index];
+    public VkImageView ImageView(int index) => _swapchainImageViews[index];
+    public VkSemaphore RenderFinished(int index) => _renderFinished[index];
 
     public Swapchain(VulkanContext context, GlfwWindow window)
     {
@@ -46,9 +46,9 @@ public sealed class Swapchain : IDisposable
         Extent = capabilities.CurrentExtent;
         if (Extent is { Width: -1, Height: -1 })
             Extent = new VkExtent2D(
-                Math.Clamp((int)window.FramebufferSize.X, capabilities.MinImageExtent.Width,
+                Math.Clamp(window.FramebufferSize.X, capabilities.MinImageExtent.Width,
                     capabilities.MaxImageExtent.Width),
-                Math.Clamp((int)window.FramebufferSize.Y, capabilities.MinImageExtent.Height,
+                Math.Clamp(window.FramebufferSize.Y, capabilities.MinImageExtent.Height,
                     capabilities.MaxImageExtent.Height)
             );
 

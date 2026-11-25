@@ -14,5 +14,5 @@ public readonly struct RenderObject
     public float3 Color { get; init; }
     public TextureId TextureId { get; init; }
     public RenderFlags Flags { get; init; }
-    public UInt32 ObjectId { get; init; }
+    public uint ObjectId { get; init; }
 }

@@ -4,8 +4,6 @@ namespace Armature.Scene;
 
 public static class HierarchyExtensions
 {
-    public static void AddParent(World world, Entity child, Entity parent)
-    {
-        world.AddComponent(child, new ParentComponent(parent));
-    }
+    public static void AddParent(World world, Entity child, Entity parent) =>
+        world.AddComponent(child, new ParentComponent { Parent = parent });
 }

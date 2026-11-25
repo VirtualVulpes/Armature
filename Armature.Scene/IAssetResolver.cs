@@ -4,7 +4,7 @@ namespace Armature.Scene;
 
 public interface IAssetResolver
 {
-    MeshId Mesh(String name);
-    PipelineId Pipeline(String name);
-    TextureId Texture(String name);
+    MeshId Mesh(string name);
+    PipelineId Pipeline(string name);
+    TextureId Texture(string name);
 }

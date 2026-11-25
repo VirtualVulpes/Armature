@@ -2,21 +2,21 @@ namespace Armature.Scene;
 
 public sealed class ComponentPool<T> : IComponentPool where T : struct
 {
-    private Int32[] _sparse = [];
+    private int[] _sparse = [];
     private Entity[] _entities = [];
     private T[] _components = [];
 
-    public Int32 Count { get; private set; }
-    public Entity GetEntityAt(Int32 index) => _entities[index];
+    public int Count { get; private set; }
+    public Entity GetEntityAt(int index) => _entities[index];
 
-    public ref T GetAt(Int32 index) => ref _components[index];
+    public ref T GetAt(int index) => ref _components[index];
 
-    public Boolean TryGetIndex(Entity entity, out Int32 index)
+    public bool TryGetIndex(Entity entity, out int index)
     {
         var id = entity.Id.Value;
         index = -1;
 
-        if (id >= (UInt32)_sparse.Length) return false;
+        if (id >= (uint)_sparse.Length) return false;
 
         index = _sparse[id];
         return index >= 0 && index < Count && _entities[index] == entity;
@@ -32,25 +32,25 @@ public sealed class ComponentPool<T> : IComponentPool where T : struct
 
         var index = Count++;
         
-        _sparse[(Int32)entity.Id.Value] = index;
+        _sparse[(int)entity.Id.Value] = index;
         _entities[index] = entity;
         _components[index] = component;
     }
 
-    public Boolean Remove(Entity entity)
+    public bool Remove(Entity entity)
     {
         if (!Has(entity)) return false;
         
-        var index = _sparse[(Int32)entity.Id.Value];
+        var index = _sparse[(int)entity.Id.Value];
         var lastIndex = --Count;
 
-        _sparse[(Int32)entity.Id.Value] = -1;
+        _sparse[(int)entity.Id.Value] = -1;
 
         if (index != lastIndex)
         {
             var lastEntity = _entities[lastIndex];
             
-            _sparse[(Int32)lastEntity.Id.Value] = index;
+            _sparse[(int)lastEntity.Id.Value] = index;
 
             _entities[index] = lastEntity;
             _components[index] = _components[lastIndex];
@@ -62,11 +62,11 @@ public sealed class ComponentPool<T> : IComponentPool where T : struct
         return true;
     }
 
-    public Boolean Has(Entity entity)
+    public bool Has(Entity entity)
     {
         var id = entity.Id.Value;
 
-        if (id >= (UInt32)_sparse.Length) return false;
+        if (id >= (uint)_sparse.Length) return false;
 
         var index = _sparse[id];
         
@@ -78,13 +78,13 @@ public sealed class ComponentPool<T> : IComponentPool where T : struct
         if (!Has(entity))
             throw new InvalidOperationException($"{entity} does not have this component");
         
-        var index = _sparse[(Int32)entity.Id.Value];
+        var index = _sparse[(int)entity.Id.Value];
         return ref _components[index];
     }
 
     private void EnsureSparseCapacity(Entity entity)
     {
-        var required = (Int32)entity.Id.Value + 1;
+        var required = (int)entity.Id.Value + 1;
         
         if (required <= _sparse.Length) return;
 

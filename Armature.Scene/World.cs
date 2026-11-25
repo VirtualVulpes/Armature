@@ -5,11 +5,11 @@ namespace Armature.Scene;
 
 public sealed partial class World
 {
-    private readonly List<UInt32> _generations = [];
+    private readonly List<uint> _generations = [];
     private readonly Stack<EntityId> _freeIds = [];
 
     private readonly List<Entity> _aliveEntities = [];
-    private readonly List<UInt32> _denseIndexBySlot = [];
+    private readonly List<uint> _denseIndexBySlot = [];
 
     private readonly Dictionary<Type, IComponentPool> _componentPools = [];
 
@@ -17,18 +17,18 @@ public sealed partial class World
 
     public Entity CreateEntity()
     {
-        UInt32 generation = 1;
+        uint generation = 1;
 
         if (!_freeIds.TryPop(out var id))
         {
-            id = new EntityId((UInt32)_generations.Count);
+            id = new EntityId((uint)_generations.Count);
             _generations.Add(generation);
-            _denseIndexBySlot.Add((UInt32)_aliveEntities.Count);
+            _denseIndexBySlot.Add((uint)_aliveEntities.Count);
         }
         else
         {
-            generation = _generations[(Int32)id.Value];
-            _denseIndexBySlot[(Int32)id.Value] = (UInt32)_aliveEntities.Count;
+            generation = _generations[(int)id.Value];
+            _denseIndexBySlot[(int)id.Value] = (uint)_aliveEntities.Count;
         }
 
         var entity = new Entity
@@ -97,7 +97,7 @@ public sealed partial class World
         }
     }
 
-    public Boolean IsEntityAlive(Entity entity)
+    public bool IsEntityAlive(Entity entity)
     {
         return entity.Id != EntityId.Invalid
                && entity.Id.Value < _generations.Count
@@ -129,7 +129,7 @@ public sealed partial class World
         GetPool<T>().Add(entity, component);
     }
 
-    public Boolean HasComponent<T>(Entity entity) where T : struct
+    public bool HasComponent<T>(Entity entity) where T : struct
     {
         ValidateEntity(entity);
         return GetPool<T>().Has(entity);
@@ -141,7 +141,7 @@ public sealed partial class World
         return ref GetPool<T>().Get(entity);
     }
 
-    public Boolean TryRemoveComponent<T>(Entity entity) where T : struct
+    public bool TryRemoveComponent<T>(Entity entity) where T : struct
     {
         ValidateEntity(entity);
         return GetPool<T>().Remove(entity);

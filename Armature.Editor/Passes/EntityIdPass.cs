@@ -35,7 +35,7 @@ public class EntityIdPass : IRenderPass
             ImageLayout = VkImageLayout.ColorAttachmentOptimal,
             LoadOp = VkAttachmentLoadOp.Clear,
             StoreOp = VkAttachmentStoreOp.Store,
-            ClearValue = new VkClearColorValue { Uint32 = new uint4(UInt32.MaxValue, 0, 0, 0) }
+            ClearValue = new VkClearColorValue { Uint32 = new uint4(uint.MaxValue, 0, 0, 0) }
         };
 
         var depthAttachment = new VkRenderingAttachmentInfo

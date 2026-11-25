@@ -22,7 +22,7 @@ public sealed class Renderer : IDisposable
     private readonly VulkanContext _context;
     private readonly GlfwWindow _window;
 
-    private CoreDescriptors _coreDescriptors;
+    private readonly CoreDescriptors _coreDescriptors;
 
     private readonly FrameResources[] _frameResources = new FrameResources[RenderConstants.MaxFramesInFlight];
     public RenderTargets Targets { get; private set; }

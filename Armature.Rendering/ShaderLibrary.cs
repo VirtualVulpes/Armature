@@ -9,7 +9,7 @@ public static class ShaderLibrary
 
     public static void AddRoot(string directory) => Roots.Add(directory);
 
-    internal static Byte[] Load(ShaderCreateInfo shader)
+    internal static byte[] Load(ShaderCreateInfo shader)
     {
         var folder = shader.Kind switch
         {

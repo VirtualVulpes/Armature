@@ -33,7 +33,7 @@ public class CameraSystem : ISystem
     public void NextCamera() => Step(1);
     public void PreviousCamera() => Step(-1);
 
-    private void Step(Int32 direction)
+    private void Step(int direction)
     {
         Resolve();
         var pool = _world.GetPool<CameraComponent>();
@@ -64,7 +64,7 @@ public class CameraSystem : ISystem
         };
     }
 
-    public void SetAspectRatio(Single aspectRatio)
+    public void SetAspectRatio(float aspectRatio)
     {
         foreach (var item in _world.Query<CameraComponent>())
         {
@@ -77,7 +77,7 @@ public class CameraSystem : ISystem
     {
     }
 
-    public void Update(Single deltaTime)
+    public void Update(float deltaTime)
     {
     }
     

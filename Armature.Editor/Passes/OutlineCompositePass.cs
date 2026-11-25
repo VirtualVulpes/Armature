@@ -8,9 +8,9 @@ namespace Armature.Editor.Passes;
 
 public class OutlineCompositePass : IRenderPass, IEditorTargetConsumer
 {
-    private Pipeline _pipeline;
-    private EditorDescriptors _editor;
-    private VkDescriptorSet _descriptorSet;
+    private readonly Pipeline _pipeline;
+    private readonly EditorDescriptors _editor;
+    private readonly VkDescriptorSet _descriptorSet;
     private EditorTargets _targets;
 
     public OutlineCompositePass(Pipeline pipeline, EditorDescriptors editor)

@@ -7,10 +7,10 @@ public delegate void RefAction<T>(ref T value);
 
 public sealed class ComponentDrawer<T> : IComponentDrawer where T : struct
 {
-    private readonly String _name;
+    private readonly string _name;
     private readonly RefAction<T> _draw;
 
-    public ComponentDrawer(String name, RefAction<T> draw)
+    public ComponentDrawer(string name, RefAction<T> draw)
     {
         _name = name;
         _draw = draw;

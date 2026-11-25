@@ -7,8 +7,8 @@ namespace Armature.Editor;
 
 public sealed class EditorRenderFeature : IFrameListener, IDisposable
 {
-    private EditorTargets _targets;
-    public readonly IEditorTargetConsumer[] _consumers;
+    private readonly EditorTargets _targets;
+    private readonly IEditorTargetConsumer[] _consumers;
 
     public EditorRenderFeature(Renderer renderer, VulkanContext ctx, PipelineManager pipelines,
         EditorDescriptors descriptors)

@@ -23,7 +23,7 @@ public sealed class QueryGenerator : IIncrementalGenerator
         });
     }
 
-    private static String Generate(Int32 arity)
+    private static string Generate(int arity)
     {
         var sb = new StringBuilder();
 
@@ -32,12 +32,12 @@ public sealed class QueryGenerator : IIncrementalGenerator
         sb.AppendLine("namespace Armature.Scene;");
         sb.AppendLine();
 
-        var types = new String[arity];
+        var types = new string[arity];
 
         for (var i = 0; i < arity; i++)
             types[i] = $"T{i + 1}";
 
-        var genericTypes = String.Join(", ", types);
+        var genericTypes = string.Join(", ", types);
 
         // QueryItem<T...>
         sb.AppendLine(
@@ -51,7 +51,7 @@ public sealed class QueryGenerator : IIncrementalGenerator
 
         sb.AppendLine();
         sb.AppendLine(
-            $"    public QueryItem(Entity entity, {String.Join(", ", CreateParameters(arity))})"
+            $"    public QueryItem(Entity entity, {string.Join(", ", CreateParameters(arity))})"
         );
         sb.AppendLine("    {");
         sb.AppendLine("        Entity = entity;");
@@ -80,7 +80,7 @@ public sealed class QueryGenerator : IIncrementalGenerator
         sb.AppendLine();
 
         sb.AppendLine(
-            $"    public Query({String.Join(", ", CreatePoolParameters(arity))})"
+            $"    public Query({string.Join(", ", CreatePoolParameters(arity))})"
         );
         sb.AppendLine("    {");
 
@@ -92,14 +92,14 @@ public sealed class QueryGenerator : IIncrementalGenerator
         sb.AppendLine();
 
         sb.AppendLine(
-            $"    public Enumerator GetEnumerator() => new({String.Join(", ", CreatePoolArguments(arity))});"
+            $"    public Enumerator GetEnumerator() => new({string.Join(", ", CreatePoolArguments(arity))});"
         );
 
         sb.AppendLine();
 
         // MaxCount
         sb.AppendLine(
-            $"    public Int32 MaxCount => {CreateMinCountExpression(arity)};"
+            $"    public int MaxCount => {CreateMinCountExpression(arity)};"
         );
 
         sb.AppendLine();
@@ -113,18 +113,18 @@ public sealed class QueryGenerator : IIncrementalGenerator
                 $"        private readonly ComponentPool<T{i + 1}> _p{i + 1};"
             );
 
-        sb.AppendLine("        private readonly Int32 _driver;");
-        sb.AppendLine("        private Int32 _index;");
+        sb.AppendLine("        private readonly int _driver;");
+        sb.AppendLine("        private int _index;");
 
         for (var i = 0; i < arity; i++)
-            sb.AppendLine($"        private Int32 _i{i + 1};");
+            sb.AppendLine($"        private int _i{i + 1};");
 
         sb.AppendLine("        private Entity _entity;");
         sb.AppendLine();
 
         // Enumerator constructor
         sb.AppendLine(
-            $"        public Enumerator({String.Join(", ", CreatePoolParameters(arity))})"
+            $"        public Enumerator({string.Join(", ", CreatePoolParameters(arity))})"
         );
         sb.AppendLine("        {");
 
@@ -157,7 +157,7 @@ public sealed class QueryGenerator : IIncrementalGenerator
         sb.AppendLine();
 
         // MoveNext
-        sb.AppendLine("        public Boolean MoveNext()");
+        sb.AppendLine("        public bool MoveNext()");
         sb.AppendLine("        {");
         sb.AppendLine("            while (--_index >= 0)");
         sb.AppendLine("            {");
@@ -240,7 +240,7 @@ public sealed class QueryGenerator : IIncrementalGenerator
         );
         AppendConstraints(sb, arity, "        ");
         sb.AppendLine(
-            $"        => new({String.Join(", ", CreateGetPoolArguments(arity))});"
+            $"        => new({string.Join(", ", CreateGetPoolArguments(arity))});"
         );
 
         sb.AppendLine("}");
@@ -248,9 +248,9 @@ public sealed class QueryGenerator : IIncrementalGenerator
         return sb.ToString();
     }
 
-    private static String[] CreateParameters(Int32 arity)
+    private static string[] CreateParameters(int arity)
     {
-        var result = new String[arity];
+        var result = new string[arity];
 
         for (var i = 0; i < arity; i++)
             result[i] = $"ref T{i + 1} c{i + 1}";
@@ -258,9 +258,9 @@ public sealed class QueryGenerator : IIncrementalGenerator
         return result;
     }
 
-    private static String[] CreatePoolParameters(Int32 arity)
+    private static string[] CreatePoolParameters(int arity)
     {
-        var result = new String[arity];
+        var result = new string[arity];
 
         for (var i = 0; i < arity; i++)
             result[i] = $"ComponentPool<T{i + 1}> p{i + 1}";
@@ -268,9 +268,9 @@ public sealed class QueryGenerator : IIncrementalGenerator
         return result;
     }
 
-    private static String[] CreatePoolArguments(Int32 arity)
+    private static string[] CreatePoolArguments(int arity)
     {
-        var result = new String[arity];
+        var result = new string[arity];
 
         for (var i = 0; i < arity; i++)
             result[i] = $"_p{i + 1}";
@@ -278,30 +278,30 @@ public sealed class QueryGenerator : IIncrementalGenerator
         return result;
     }
 
-    private static String[] CreateGetPoolArguments(Int32 arity)
+    private static string[] CreateGetPoolArguments(int arity)
     {
-        var result = new String[arity];
+        var result = new string[arity];
 
         for (var i = 0; i < arity; i++)
             result[i] = $"GetPool<T{i + 1}>()";
-
+    
         return result;
     }
 
-    private static String CreateMinCountExpression(Int32 arity)
+    private static string CreateMinCountExpression(int arity)
     {
         var expression = $"_p{arity}.Count";
 
         for (var i = arity - 1; i >= 1; i--)
-            expression = $"Math.Min(_p{i}.Count, {expression})";
+            expression = $"int.Min(_p{i}.Count, {expression})";
 
         return expression;
     }
     
     private static void AppendConstraints(
         StringBuilder sb,
-        Int32 arity,
-        String indent = "    ")
+        int arity,
+        string indent = "    ")
     {
         for (var i = 0; i < arity; i++)
             sb.AppendLine($"{indent}where T{i + 1} : struct");

@@ -6,19 +6,19 @@ namespace Armature.Rendering;
 
 public sealed class MeshManager : IDisposable
 {
-    private UInt32 _nextId;
+    private uint _nextId;
     private readonly VmaAllocator _allocator;
     
     private readonly Dictionary<MeshId, Mesh> _meshes = new();
     private readonly Dictionary<MeshId, GpuMesh> _gpuMeshes = new();
-    private readonly Dictionary<String, MeshId> _names = new();
+    private readonly Dictionary<string, MeshId> _names = new();
 
     public MeshManager(VmaAllocator allocator)
     {
         _allocator = allocator;
     }
     
-    public MeshId AddMesh(String name, Mesh mesh)
+    public MeshId AddMesh(string name, Mesh mesh)
     {
         var meshId = new MeshId(_nextId++);
         
@@ -53,12 +53,12 @@ public sealed class MeshManager : IDisposable
         return _meshes[meshId];
     }
 
-    public Boolean HasMesh(String name)
+    public bool HasMesh(string name)
     {
         return _names.ContainsKey(name);
     }
     
-    public Boolean HasMesh(MeshId id)
+    public bool HasMesh(MeshId id)
     {
         return _meshes.ContainsKey(id);
     }
@@ -68,7 +68,7 @@ public sealed class MeshManager : IDisposable
         return _gpuMeshes[meshId];
     }
 
-    public MeshId GetMeshId(String name)
+    public MeshId GetMeshId(string name)
     {
         return _names[name];
     }

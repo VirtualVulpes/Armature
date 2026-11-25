@@ -1,8 +1,8 @@
+using Armature.Core;
 using Armature.Rendering;
 using Armature.Scene;
 using Armature.Scene.Components;
 using Armature.Scene.Systems;
-using Brutal.Numerics;
 
 namespace Armature.SceneRendering;
 
@@ -31,7 +31,7 @@ public sealed class RenderSystem : ISystem
         var textureQuery = _world.Query<TransformComponent, PipelineComponent, MeshComponent, TextureComponent>();
 
         if (Scene.Objects.Length < colorQuery.MaxCount + textureQuery.MaxCount)
-            Array.Resize(ref Scene.Objects, Int32.Max(colorQuery.MaxCount + textureQuery.MaxCount, 16));
+            Array.Resize(ref Scene.Objects, int.Max(colorQuery.MaxCount + textureQuery.MaxCount, 16));
 
         Scene.ObjectCount = 0;
 
@@ -73,7 +73,7 @@ public sealed class RenderSystem : ISystem
         var query = _world.Query<TransformComponent, LightComponent>();
 
         if (Scene.Lights.Length < query.MaxCount)
-            Array.Resize(ref Scene.Lights, Int32.Max(query.MaxCount, 16));
+            Array.Resize(ref Scene.Lights, int.Max(query.MaxCount, 16));
 
         Scene.LightCount = 0;
 
@@ -86,16 +86,11 @@ public sealed class RenderSystem : ISystem
                 Color = light.C2.Color,
                 Intensity = light.C2.Intensity,
                 Range = light.C2.Range,
-                Direction = GetLightDirection(world, light.C2.Direction),
-                Type = (Int32)light.C2.Type,
+                Direction = TransformUtility.TransformDirection(light.C2.Direction, world),
+                Type = (int)light.C2.Type,
                 InnerCos = light.C2.InnerCos,
                 OuterCos = light.C2.OuterCos
             };
         }
-    }
-    
-    private float3 GetLightDirection(float4x4 world, float3 localDir)
-    {
-        return float3.NormalizeOrZero(float3.TransformNormal(localDir, world));
     }
 }

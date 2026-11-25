@@ -21,19 +21,19 @@ public sealed class VulkanContext : IDisposable
     {
         _ = Brutal.VulkanApi.Vulkan.GetInstanceProcAddr;
 
-        var instanceExtensions = new HashSet<String>();
+        var instanceExtensions = new HashSet<string>();
         VulkanHelpers.AddPlatformRequiredExtensions(instanceExtensions);
         var glfwExtensions = Glfw.GetRequiredInstanceExtensions(out var glfwExtensionCount);
         for (var i = 0; i < glfwExtensionCount; i++)
             instanceExtensions.Add(Utf8.GetString((Ptr<byte>)glfwExtensions[i]));
 
-        var layers = new HashSet<String>();
+        var layers = new HashSet<string>();
         VulkanHelpers.AddValidationLayers(layers);
 
         Instance = Brutal.VulkanApi.Vulkan.CreateInstance(
             new Instance.CreateInfo
             {
-                AppInfo = new VkApplicationInfo { ApiVersion = (Int32)VulkanHelpers.Api.VERSION_1_3 },
+                AppInfo = new VkApplicationInfo { ApiVersion = (int)VulkanHelpers.Api.VERSION_1_3 },
                 Flags = VulkanHelpers.GetPlatformRequiredInstanceCreateFlags(),
                 EnabledExtensions = instanceExtensions,
                 EnabledLayers = layers,
@@ -42,7 +42,7 @@ public sealed class VulkanContext : IDisposable
 
         var result = Glfw.CreateWindowSurface(Instance.VkHandle, window, out var surfaceHandle);
 
-        if (result != (Int32)VkResult.Success)
+        if (result != (int)VkResult.Success)
             throw new InvalidOperationException($"Failed to create Vulkan surface: {result}");
 
         Surface = new VkSurfaceKHR((nint)surfaceHandle);
@@ -65,7 +65,7 @@ public sealed class VulkanContext : IDisposable
             throw new InvalidOperationException(
                 "No Vulkan device has a queue family that can draw and present to the window");
 
-        var deviceExtensions = new HashSet<String>();
+        var deviceExtensions = new HashSet<string>();
         VulkanHelpers.AddSwapchainExtensions(deviceExtensions);
         VulkanHelpers.AddMandatoryIfSupportedDeviceExtensions(deviceExtensions, PhysicalDevice);
 
@@ -112,7 +112,7 @@ public sealed class VulkanContext : IDisposable
                 Instance = Instance,
                 PhysicalDevice = PhysicalDevice,
                 Device = Device,
-                VulkanApiVersion = (UInt32)VulkanHelpers.Api.VERSION_1_3
+                VulkanApiVersion = (uint)VulkanHelpers.Api.VERSION_1_3
             }
         );
     }

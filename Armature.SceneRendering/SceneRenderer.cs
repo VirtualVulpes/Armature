@@ -1,4 +1,3 @@
-using Armature.Core;
 using Armature.Rendering;
 using Armature.Vulkan;
 using Brutal;
@@ -50,7 +49,7 @@ public sealed class SceneRenderer : IFrameListener, IDisposable
             var lightBuffer = new BufferEx.CreateInfo
             {
                 Name = "Lights Storage Buffer",
-                BufferSize = ByteSize.Of<UInt32>() * 4 + ByteSize.Of<GpuLight>() * RenderConstants.MaxLights,
+                BufferSize = ByteSize.Of<uint>() * 4 + ByteSize.Of<GpuLight>() * RenderConstants.MaxLights,
                 BufferUsage = VkBufferUsageFlags.StorageBufferBit,
                 AllocRequiredProperties = VkMemoryPropertyFlags.HostVisibleBit | VkMemoryPropertyFlags.HostCoherentBit
             };
@@ -77,7 +76,7 @@ public sealed class SceneRenderer : IFrameListener, IDisposable
             {
                 Buffer = r.LightsBuffer.VkBuffer,
                 Offset = ByteSize.Zero,
-                Range = ByteSize.Of<UInt32>() * 4 + ByteSize.Of<GpuLight>() * RenderConstants.MaxLights
+                Range = ByteSize.Of<uint>() * 4 + ByteSize.Of<GpuLight>() * RenderConstants.MaxLights
             };
 
             var cameraInfo = new VkDescriptorBufferInfo
@@ -123,15 +122,15 @@ public sealed class SceneRenderer : IFrameListener, IDisposable
         Buffer.MemoryCopy(
             &count,
             r.LightsMemory.MapPtr.Pointer,
-            ByteSize.Of<UInt32>() * 4 + ByteSize.Of<GpuLight>() * RenderConstants.MaxLights,
-            ByteSize.Of<UInt32>()
+            ByteSize.Of<uint>() * 4 + ByteSize.Of<GpuLight>() * RenderConstants.MaxLights,
+            ByteSize.Of<uint>()
         );
 
         fixed (GpuLight* lightsPtr = lights)
         {
             Buffer.MemoryCopy(
                 lightsPtr,
-                (Byte*)r.LightsMemory.MapPtr.Pointer + ByteSize.Of<UInt32>() * 4,
+                (byte*)r.LightsMemory.MapPtr.Pointer + ByteSize.Of<uint>() * 4,
                 ByteSize.Of<GpuLight>() * RenderConstants.MaxLights,
                 ByteSize.Of<GpuLight>() * lights.Length
             );

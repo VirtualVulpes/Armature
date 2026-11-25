@@ -20,7 +20,7 @@ public static class ShaderCreation
             using var spirv = compiler.Compile(name, shader.Kind, name, "main"u8, options);
             var module = ShaderModuleExtensions.FromSpirv(
                 device,
-                new ReadOnlySpan<Byte>(spirv.GetBytes(), spirv.GetLength()),
+                new ReadOnlySpan<byte>(spirv.GetBytes(), spirv.GetLength()),
                 null
             );
 
@@ -49,7 +49,7 @@ public static class ShaderCreation
         using var spirv = compiler.Compile(name, shader.Kind, name, "main"u8, options);
         var module = ShaderModuleExtensions.FromSpirv(
             device,
-            new ReadOnlySpan<Byte>(spirv.GetBytes(), spirv.GetLength()),
+            new ReadOnlySpan<byte>(spirv.GetBytes(), spirv.GetLength()),
             null
         );
 

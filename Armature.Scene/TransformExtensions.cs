@@ -29,23 +29,19 @@ public static class TransformExtensions
         transform.Position += Right(transform) * delta.X + float3.UnitY * delta.Y + Forward(transform) * delta.Z;
     }
 
-    public static void RotateLocal(ref TransformComponent transform, float3 axis, Single angle)
+    public static void RotateLocal(ref TransformComponent transform, float3 axis, float angle)
     {
         transform.Rotation = floatQuat.Normalize(transform.Rotation * floatQuat.CreateFromAxisAngle(axis, angle));
     }
 
-    public static void RotateWorld(ref TransformComponent transform, float3 axis, Single angle)
+    public static void RotateWorld(ref TransformComponent transform, float3 axis, float angle)
     {
         transform.Rotation = floatQuat.Normalize(floatQuat.CreateFromAxisAngle(axis, angle) * transform.Rotation);
     }
 
-    public static float3 Forward(TransformComponent transform)
-    {
-        return transform.Rotation * -float3.UnitZ;
-    }
+    public static float3 Forward(TransformComponent transform) => transform.Rotation * -float3.UnitZ;
+    
 
-    public static float3 Right(TransformComponent transform)
-    {
-        return transform.Rotation * float3.UnitX;
-    }
+    public static float3 Right(TransformComponent transform) => transform.Rotation * float3.UnitX;
+    
 }

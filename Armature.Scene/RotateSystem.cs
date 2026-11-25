@@ -6,7 +6,7 @@ namespace Armature.Scene;
 
 public class RotateSystem : ISystem
 {
-    private World _world;
+    private readonly World _world;
 
     public RotateSystem(World world)
     {
@@ -17,7 +17,7 @@ public class RotateSystem : ISystem
     {
     }
 
-    public void Update(Single deltaTime)
+    public void Update(float deltaTime)
     {
         var query = _world.Query<TransformComponent, RotateComponent>();
 

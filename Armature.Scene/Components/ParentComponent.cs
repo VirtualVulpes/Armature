@@ -1,3 +1,6 @@
 namespace Armature.Scene.Components;
 
-public record struct ParentComponent(Entity Parent);
+public record struct ParentComponent
+{
+    public Entity Parent;
+}

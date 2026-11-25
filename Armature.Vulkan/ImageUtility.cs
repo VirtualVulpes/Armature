@@ -16,8 +16,8 @@ public static class ImageUtility
         VkAccessFlags dstAccess,
         VkImageAspectFlags imageAspectFlags,
         CommandBuffer commandBuffer,
-        Int32 mipLevels = 1,
-        Int32 baseMipLevel = 0
+        int mipLevels = 1,
+        int baseMipLevel = 0
     )
     {
         commandBuffer.PipelineBarrier(
@@ -49,8 +49,8 @@ public static class ImageUtility
         );
     }
 
-    public static void CopyBufferToImage(CommandBuffer commandBuffer, VkBuffer buffer, ImageEx image, Int32 width,
-        Int32 height)
+    public static void CopyBufferToImage(CommandBuffer commandBuffer, VkBuffer buffer, ImageEx image, int width,
+        int height)
     {
         var region = new VkBufferImageCopy
         {

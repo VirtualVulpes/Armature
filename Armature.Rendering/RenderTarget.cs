@@ -9,7 +9,7 @@ public sealed class RenderTarget : IDisposable
     public TrackedImage Image { get; }
     public ImageViewEx View { get; }
 
-    public RenderTarget(VmaAllocator allocator, String name, VkFormat format, VkExtent2D extent,
+    public RenderTarget(VmaAllocator allocator, string name, VkFormat format, VkExtent2D extent,
         VkImageUsageFlags usage, VkSampleCountFlags samples = VkSampleCountFlags._1Bit,
         VkImageAspectFlags aspect = VkImageAspectFlags.ColorBit)
     {

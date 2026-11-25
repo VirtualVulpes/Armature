@@ -8,17 +8,17 @@ public sealed class PipelineManager : IDisposable
 {
     private readonly DeviceEx _device;
 
-    private UInt32 _nextId;
+    private uint _nextId;
 
     private readonly Dictionary<PipelineId, Pipeline> _pipelines = new();
-    private readonly Dictionary<String, PipelineId> _names = new();
+    private readonly Dictionary<string, PipelineId> _names = new();
 
     public PipelineManager(DeviceEx device)
     {
         _device = device;
     }
 
-    public PipelineId AddGraphicsPipeline(String name, GraphicsPipelineDescription description)
+    public PipelineId AddGraphicsPipeline(string name, GraphicsPipelineDescription description)
     {
         var pipelineId = new PipelineId(_nextId++);
 
@@ -30,7 +30,7 @@ public sealed class PipelineManager : IDisposable
         return pipelineId;
     }
 
-    public PipelineId AddComputePipeline(String name, ComputePipelineDescription description)
+    public PipelineId AddComputePipeline(string name, ComputePipelineDescription description)
     {
         var pipelineId = new PipelineId(_nextId++);
 
@@ -47,12 +47,12 @@ public sealed class PipelineManager : IDisposable
         return _pipelines[pipelineId];
     }
 
-    public Pipeline GetPipeline(String name)
+    public Pipeline GetPipeline(string name)
     {
         return _pipelines[_names[name]];
     }
 
-    public PipelineId GetPipelineId(String name)
+    public PipelineId GetPipelineId(string name)
     {
         return _names[name];
     }

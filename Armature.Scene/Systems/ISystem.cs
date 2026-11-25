@@ -3,5 +3,5 @@ namespace Armature.Scene.Systems;
 public interface ISystem
 {
     void Start() { }
-    void Update(Single deltaTime) { }
+    void Update(float deltaTime) { }
 }

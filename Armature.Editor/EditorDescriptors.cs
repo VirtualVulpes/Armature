@@ -49,7 +49,7 @@ public sealed class EditorDescriptors : IDisposable
             PoolSizes = pools
         };
 
-        _descriptorPool = DescriptorPoolExExtensions.CreateDescriptorPool(_context.Device, poolInfo, null);
+        _descriptorPool = _context.Device.CreateDescriptorPool(poolInfo, null);
     }
 
     private void CreateTextureSampler()
@@ -63,7 +63,7 @@ public sealed class EditorDescriptors : IDisposable
             AddressModeV = VkSamplerAddressMode.ClampToEdge,
             AddressModeW = VkSamplerAddressMode.ClampToEdge,
             AnisotropyEnable = true,
-            MaxAnisotropy = VkInstanceExtensions.GetProperties(_context.PhysicalDevice).Limits.MaxSamplerAnisotropy,
+            MaxAnisotropy = _context.PhysicalDevice.GetProperties().Limits.MaxSamplerAnisotropy,
             CompareEnable = false,
             CompareOp = VkCompareOp.Always,
             BorderColor = VkBorderColor.IntOpaqueBlack,
@@ -73,7 +73,7 @@ public sealed class EditorDescriptors : IDisposable
             MaxLod = 1000.0f
         };
 
-        _sampler = VkDeviceExtensions.CreateSampler(_context.Device, samplerInfo, null);
+        _sampler = _context.Device.CreateSampler(samplerInfo, null);
     }
     
     private void CreateOutlineCompositeSet()
@@ -101,7 +101,7 @@ public sealed class EditorDescriptors : IDisposable
             Bindings = bindings,
         };
 
-        OutlineCompositeLayout = DescriptorSetLayoutExExtensions.CreateDescriptorSetLayout(_context.Device, layoutInfo, null);
+        OutlineCompositeLayout = _context.Device.CreateDescriptorSetLayout(layoutInfo, null);
     }
 
     private void CreateSeedSets()
@@ -129,7 +129,7 @@ public sealed class EditorDescriptors : IDisposable
             Bindings = bindings
         };
 
-        SeedLayout = DescriptorSetLayoutExExtensions.CreateDescriptorSetLayout(_context.Device, layoutInfo, null);
+        SeedLayout = _context.Device.CreateDescriptorSetLayout(layoutInfo, null);
     }
 
     public unsafe void UpdateOutlineDescriptor(VkDescriptorSet descriptorSet, VkImageView colorImageView,
@@ -167,7 +167,7 @@ public sealed class EditorDescriptors : IDisposable
                 ImageInfo = &seedInfo
             }
         ];
-        VkDeviceExtensions.UpdateDescriptorSets(_context.Device, writes, null);
+        _context.Device.UpdateDescriptorSets(writes, null);
     }
 
     public unsafe void UpdateSeedDescriptor(VkDescriptorSet descriptorSet, VkImageView maskImageView,
@@ -204,25 +204,25 @@ public sealed class EditorDescriptors : IDisposable
                 ImageInfo = &seedInfo
             }
         ];
-        VkDeviceExtensions.UpdateDescriptorSets(_context.Device, writes, null);
+        _context.Device.UpdateDescriptorSets(writes, null);
     }
 
     public VkDescriptorSet AllocateOutlineDescriptorSet()
     {
-        return DescriptorPoolExExtensions.AllocateDescriptorSet(_context.Device, _descriptorPool, OutlineCompositeLayout);
+        return _context.Device.AllocateDescriptorSet(_descriptorPool, OutlineCompositeLayout);
     }
 
     public VkDescriptorSet AllocateSeedDescriptorSet()
     {
-        return DescriptorPoolExExtensions.AllocateDescriptorSet(_context.Device, _descriptorPool, SeedLayout);
+        return _context.Device.AllocateDescriptorSet(_descriptorPool, SeedLayout);
     }
 
     public void Dispose()
     {
-        VkDeviceExtensions.DestroyDescriptorPool(_context.Device, _descriptorPool, null);
-        VkDeviceExtensions.DestroySampler(_context.Device, _sampler, null);
+        _context.Device.DestroyDescriptorPool(_descriptorPool, null);
+        _context.Device.DestroySampler(_sampler, null);
         
-        VkDeviceExtensions.DestroyDescriptorSetLayout(_context.Device, OutlineCompositeLayout, null);
-        VkDeviceExtensions.DestroyDescriptorSetLayout(_context.Device, SeedLayout, null);
+        _context.Device.DestroyDescriptorSetLayout(OutlineCompositeLayout, null);
+        _context.Device.DestroyDescriptorSetLayout(SeedLayout, null);
     }
 }

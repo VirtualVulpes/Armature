@@ -8,14 +8,14 @@ public sealed class SelectionHelper
 {
     private readonly World _world;
     
-    private Int32 _nextSelected = 1;
+    private int _nextSelected = 1;
 
     public SelectionHelper(World world)
     {
         _world = world;
     }
 
-    private void SelectEntity(Entity e, Boolean additive)
+    private void SelectEntity(Entity e, bool additive)
     {
         if (additive)
         {
@@ -39,7 +39,7 @@ public sealed class SelectionHelper
 
     }
 
-    public void Click(Entity? entity, Boolean additive)
+    public void Click(Entity? entity, bool additive)
     {
         if (entity is { } e) SelectEntity(e, additive);
         else if (!additive) ClearSelection();

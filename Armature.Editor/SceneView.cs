@@ -17,7 +17,7 @@ public sealed class SceneView
     private readonly List<Entity> _roots = [];
     private Entity _active;
     private Entity? _clicked;
-    private (Entity child, Entity parent, Boolean has) _pendingReparent;
+    private (Entity child, Entity parent, bool has) _pendingReparent;
 
     public SceneView(World world, SelectionHelper selection, InputManager input)
     {
@@ -81,7 +81,7 @@ public sealed class SceneView
 
         var name = GetName(entity);
 
-        ImGui.PushID((Int32)entity.Id.Value);
+        ImGui.PushID((int)entity.Id.Value);
 
         var isActive = entity == _active;
         if (isActive) ImGui.PushStyleColor(ImGuiCol.Header, new float4(0.18f, 0.18f, 0.18f, 1.0f));
@@ -106,7 +106,7 @@ public sealed class SceneView
         ImGui.PopID();
     }
 
-    private String GetName(Entity entity)
+    private string GetName(Entity entity)
     {
         return _world.HasComponent<NameComponent>(entity)
             ? _world.GetComponent<NameComponent>(entity).Name

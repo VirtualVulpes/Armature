@@ -31,8 +31,6 @@ public sealed class CommandBufferManager(DeviceEx device, Queue queue, VkCommand
             VkFence.NullHandle
         );
         queue.WaitIdle();
-
-        buffer = default;
     }
     
     public static CommandBuffer BeginSingleTimeCommands(DeviceEx device, VkCommandPool commandPool)
@@ -61,7 +59,5 @@ public sealed class CommandBufferManager(DeviceEx device, Queue queue, VkCommand
             VkFence.NullHandle
         );
         queue.WaitIdle();
-
-        buffer = default;
     }
 }

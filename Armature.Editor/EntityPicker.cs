@@ -11,24 +11,24 @@ public sealed class EntityPicker : IDisposable, IFrameListener
 {
     private readonly EditorTargets _targets;
     private readonly BufferEx[] _buffers;
-    private readonly Boolean[] _inFlight;
+    private readonly bool[] _inFlight;
 
     private int2? _requested;
 
-    public UInt32? HoveredObjectId { get; private set; }
+    public uint? HoveredObjectId { get; private set; }
 
     public EntityPicker(VulkanContext ctx, EditorTargets targets)
     {
         _targets = targets;
         _buffers = new BufferEx[RenderConstants.MaxFramesInFlight];
-        _inFlight = new Boolean[RenderConstants.MaxFramesInFlight];
+        _inFlight = new bool[RenderConstants.MaxFramesInFlight];
 
         for (var i = 0; i < RenderConstants.MaxFramesInFlight; i++)
         {
-            _buffers[i] = BufferExExtensions.CreateBuffer(ctx.Device, new BufferEx.CreateInfo
+            _buffers[i] = ctx.Device.CreateBuffer(new BufferEx.CreateInfo
             {
                 Name = "Picking Buffer",
-                BufferSize = ByteSize.Of<UInt32>(),
+                BufferSize = ByteSize.Of<uint>(),
                 BufferUsage = VkBufferUsageFlags.TransferDstBit,
                 AllocRequiredProperties = VkMemoryPropertyFlags.HostVisibleBit | VkMemoryPropertyFlags.HostCoherentBit
             });
@@ -41,7 +41,7 @@ public sealed class EntityPicker : IDisposable, IFrameListener
         if (pixel is null) HoveredObjectId = null;
     }
 
-    public void Record(CommandBuffer cmd, Int32 frameIndex, TrackedImage idImage, int2 pixel)
+    public void Record(CommandBuffer cmd, int frameIndex, TrackedImage idImage, int2 pixel)
     {
         idImage.TransitionTo(cmd, VkImageLayout.TransferSrcOptimal, VkPipelineStageFlags.TransferBit,
             VkAccessFlags.TransferReadBit);
@@ -60,7 +60,7 @@ public sealed class EntityPicker : IDisposable, IFrameListener
         _inFlight[frameIndex] = true;
     }
 
-    private unsafe void Collect(Int32 frameIndex)
+    private unsafe void Collect(int frameIndex)
     {
         if (!_inFlight[frameIndex]) return;
         _inFlight[frameIndex] = false;
@@ -68,7 +68,7 @@ public sealed class EntityPicker : IDisposable, IFrameListener
         var memory = _buffers[frameIndex].Map();
         try
         {
-            var raw = *(UInt32*)memory.MapPtr.Pointer;
+            var raw = *(uint*)memory.MapPtr.Pointer;
             HoveredObjectId = (raw & 0xFFFF) == 0xFFFF ? null : raw;
         }
         finally
@@ -86,7 +86,7 @@ public sealed class EntityPicker : IDisposable, IFrameListener
         HoveredObjectId = null;
     }
 
-    public void OnFrameBegin(Int32 frameIndex) => Collect(frameIndex);
+    public void OnFrameBegin(int frameIndex) => Collect(frameIndex);
 
     public void OnPostRecord(RenderContext ctx)
     {

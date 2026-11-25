@@ -29,7 +29,7 @@ public static class PushConstantBlocks
     public struct TextureFragmentBlock
     {
         [FieldOffset(0)]
-        public UInt32 TextureId;
+        public uint TextureId;
     }
     
     [StructLayout(LayoutKind.Explicit, Size = 12)]
@@ -43,14 +43,14 @@ public static class PushConstantBlocks
     public struct JumpPassBlock
     {
         [FieldOffset(0)]
-        public UInt32 JumpDistance;
+        public uint JumpDistance;
     }
         
     [StructLayout(LayoutKind.Explicit, Size = 4)]
     public struct EntityIdBlock
     {
         [FieldOffset(0)]
-        public UInt32 Id;
+        public uint Id;
     }
 
     [StructLayout(LayoutKind.Explicit, Size = 48)]
@@ -60,18 +60,18 @@ public static class PushConstantBlocks
         public float3 Center;
 
         [FieldOffset(12)] 
-        public Single Radius;
+        public float Radius;
         
         [FieldOffset(16)] 
         public float3 LightDirection;
 
         [FieldOffset(28)] 
-        public UInt32 Enabled; // 0 or 1
+        public uint Enabled; // 0 or 1
         
         [FieldOffset(32)] 
         public float3 LightColor;
         
         [FieldOffset(44)] 
-        public Single LightIntensity;
+        public float LightIntensity;
     }
 }

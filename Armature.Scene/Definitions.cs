@@ -5,12 +5,12 @@ namespace Armature.Scene;
 
 public interface ISceneDef;
 
-public sealed record EntityDef(String Name, IComponentDef[] Components, EntityDef[]? Children = null) : ISceneDef
+public sealed record EntityDef(string Name, IComponentDef[] Components, EntityDef[]? Children = null) : ISceneDef
 {
     public EntityDef[] Children { get; } = Children ?? [];
 }
 
-public sealed record SceneDef(String Name, IReadOnlyList<ISceneDef> Definitions);
+public sealed record SceneDef(string Name, IReadOnlyList<ISceneDef> Definitions);
 
 public interface IComponentDef
 {
@@ -39,7 +39,7 @@ public sealed record TransformDef : IComponentDef
     }
 }
 
-public sealed record MeshDef(String Name) : IComponentDef
+public sealed record MeshDef(string Name) : IComponentDef
 {
     public void Apply(World world, Entity entity, IAssetResolver assets)
     {
@@ -47,7 +47,7 @@ public sealed record MeshDef(String Name) : IComponentDef
     }
 }
 
-public sealed record TextureDef(String Name) : IComponentDef
+public sealed record TextureDef(string Name) : IComponentDef
 {
     public void Apply(World world, Entity entity, IAssetResolver assets)
     {
@@ -55,7 +55,7 @@ public sealed record TextureDef(String Name) : IComponentDef
     }
 }
 
-public sealed record PipelineDef(String Name) : IComponentDef
+public sealed record PipelineDef(string Name) : IComponentDef
 {
     public void Apply(World world, Entity entity, IAssetResolver assets)
     {
@@ -88,11 +88,11 @@ public sealed record LightDef : IComponentDef
 {
     public LightType Type;
     public float3 Color;
-    public Single Intensity;
-    public Single Range = 0.0f;
+    public float Intensity;
+    public float Range = 0.0f;
     public float3 Direction = float3.Zero;
-    public Single InnerCos = 0.0f;
-    public Single OuterCos = 0.0f;
+    public float InnerCos = 0.0f;
+    public float OuterCos = 0.0f;
 
     public void Apply(World world, Entity entity, IAssetResolver assets)
     {
@@ -107,10 +107,10 @@ public sealed record LightDef : IComponentDef
 
 public sealed record CameraDef : IComponentDef
 {
-    public Single AspectRatio = 16.0f / 9.0f;
-    public Single Fov = Single.DegreesToRadians(60.0f);
-    public Single ZNear = 0.1f;
-    public Single ZFar = 100.0f;
+    public float AspectRatio = 16.0f / 9.0f;
+    public float Fov = float.DegreesToRadians(60.0f);
+    public float ZNear = 0.1f;
+    public float ZFar = 100.0f;
  
     public void Apply(World world, Entity entity, IAssetResolver assets)
     {
