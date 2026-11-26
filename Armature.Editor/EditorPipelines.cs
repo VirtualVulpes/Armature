@@ -1,3 +1,4 @@
+using Armature.Editor.Passes;
 using Armature.Rendering;
 using Armature.Rendering.Pipelines;
 using Armature.Vulkan;
@@ -33,6 +34,13 @@ public static class EditorPipelines
         {
             ColorFormat = swapchainFormat,
             FragmentPushSize = ByteSize.Of<int>() * 2,
+            Layouts = [core.GlobalLayout]
+        });
+        
+        m.Add("Viewport Capture", "fullscreen.vert", "viewport_capture.frag", new MeshPipelineOptions
+        {
+            ColorFormat = swapchainFormat,
+            FragmentPushSize = ByteSize.Of<ViewportCapturePass.PushData>(),
             Layouts = [core.GlobalLayout]
         });
         

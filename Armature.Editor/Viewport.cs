@@ -1,57 +1,35 @@
-using Armature.DebugUi;
-using Armature.Rendering;
-using Brutal;
 using Brutal.ImGuiApi;
 using Brutal.Numerics;
-using Brutal.VulkanApi;
 
 namespace Armature.Editor;
 
-public sealed class Viewport : IEditorWindow, IFrameListener
+public sealed class Viewport : IEditorWindow
 {
-    private readonly ImGuiManager _imGui;
-    private readonly CoreDescriptors _core;
-
-    private RenderTarget? _sceneColor;
-    private VkDescriptorSet _set;
+    private readonly ViewportTarget _target;
     
-    public Viewport(Renderer renderer, ImGuiManager imGui, CoreDescriptors core)
+    public Viewport(ViewportTarget target)
     {
-        renderer.AddListener(this);
-        _imGui = imGui;
-        _core = core; 
-    }
-
-    private void RegisterSceneColor()
-    {
-        _set = _imGui.RegisterTexture(_sceneColor.View.VkImageView, _core.TargetSampler);
+        _target = target;
     }
     
     public void Draw()
     {
-        if (_sceneColor == null) return;
-        
         ImGui.Begin("Viewport"u8);
 
-        var tex = new ImTextureRef
+        var avail = ImGui.GetContentRegionAvail();
+        _target.Resize(new int2((int)avail.X, (int)avail.Y));
+
+        if (_target.Target != null)
         {
-            _TexData = null,
-            _TexID = (ImTextureID)_set.VkHandle
-        };
+            var tex = new ImTextureRef
+            {
+                _TexData = null,
+                _TexID = (ImTextureID)_target.Set.VkHandle
+            };
         
-        ImGui.Image(tex, new float2(1920, 1080));
+            ImGui.Image(tex, new float2(_target.Extent.Width, _target.Extent.Height));
+        }
         
         ImGui.End();
-    }
-
-    public void OnPostRecord(RenderContext ctx)
-    {
-        if (ReferenceEquals(_sceneColor, ctx.SceneColor)) return;
-
-        if (_set.IsNotNull())
-            _imGui.UnregisterTexture(_set);
-        
-        _sceneColor = ctx.SceneColor;
-        RegisterSceneColor();
     }
 }

@@ -11,6 +11,7 @@ public sealed class RenderTarget : IDisposable
     public ImageViewEx View { get; }
     public bool HasData { get; set; }
     public int BindlessIndex { get; set; } = -1;
+    public VkExtent2D Extent { get; }
 
     public RenderTarget(VmaAllocator allocator, string name, VkFormat format, VkExtent2D extent,
         VkImageUsageFlags usage, VkSampleCountFlags samples = VkSampleCountFlags._1Bit,
@@ -44,6 +45,8 @@ public sealed class RenderTarget : IDisposable
             BaseArrayLayer = 0,
             LevelCount = 1
         }, null);
+
+        Extent = extent;
     }
 
     public VkRenderingAttachmentInfo AsColorAttachment(CommandBuffer cmd, RenderTarget? resolve = null, bool overwritesAll = false,
