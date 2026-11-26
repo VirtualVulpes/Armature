@@ -353,7 +353,7 @@ public sealed class ImGuiManager : IDisposable, IFrameListener, IUiCaptureState
         }
     }
 
-    private unsafe void CreateTexture(ImTextureDataPtr texture)
+    private void CreateTexture(ImTextureDataPtr texture)
     {
         var format = (texture.BytesPerPixel == 4) ? VkFormat.R8G8B8A8UNorm : VkFormat.R8UNorm;
 
@@ -386,13 +386,26 @@ public sealed class ImGuiManager : IDisposable, IFrameListener, IUiCaptureState
         };
         var view = image.CreateImageView(VkImageViewType._2D, range, image.Allocator.VkAllocator);
 
+        var set = RegisterTexture(view.VkImageView, _fontSampler);
+
+        _textures[texture.UniqueID] = new TextureBackend
+        {
+            Image = image,
+            View = view,
+            Set = set
+        };
+        texture.SetTexID((ImTextureID)set.VkHandle);
+    }
+
+    public unsafe VkDescriptorSet RegisterTexture(VkImageView view, VkSampler sampler)
+    {
         var set = _device.AllocateDescriptorSet(_descriptorPool, DescriptorSetLayout);
 
         var imageInfo = new VkDescriptorImageInfo
         {
             ImageLayout = VkImageLayout.ShaderReadOnlyOptimal,
-            ImageView = view.VkImageView,
-            Sampler = _fontSampler
+            ImageView = view,
+            Sampler = sampler
         };
         var write = new VkWriteDescriptorSet
         {
@@ -404,14 +417,10 @@ public sealed class ImGuiManager : IDisposable, IFrameListener, IUiCaptureState
         };
         _device.UpdateDescriptorSets([write], []);
 
-        _textures[texture.UniqueID] = new TextureBackend
-        {
-            Image = image,
-            View = view,
-            Set = set
-        };
-        texture.SetTexID((ImTextureID)set.VkHandle);
+        return set;
     }
+
+    public void UnregisterTexture(VkDescriptorSet set) => _device.FreeDescriptorSet(_descriptorPool, set);
 
     private unsafe void UploadTexture(ImTextureDataPtr texture, VkImageLayout oldLayout)
     {

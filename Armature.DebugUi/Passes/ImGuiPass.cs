@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Armature.Rendering;
 using Armature.Rendering.Passes;
 using Brutal;
@@ -9,16 +10,19 @@ namespace Armature.DebugUi.Passes;
 
 public class ImGuiPass : IRenderPass
 {
-    private readonly ImGuiManager _manager;
+    private readonly ImGuiManager _imGui;
 
-    public ImGuiPass(ImGuiManager imGuiManager)
+    public ImGuiPass(ImGuiManager imGui)
     {
-        _manager = imGuiManager;
+        _imGui = imGui;
     }
 
     public unsafe void Record(in RenderContext ctx, ReadOnlySpan<RenderItem> _)
     {
-        var colorAttachment = ctx.SceneColor.AsColorAttachment(ctx.CommandBuffer);
+        var output = ctx.AcquireOutput();
+        var colorAttachment = output.AsColorAttachment(ctx.CommandBuffer);
+
+        ctx.SceneColor.AsSampled(ctx.CommandBuffer);
         
         ctx.CommandBuffer.BeginRendering(
             new VkRenderingInfo
@@ -47,7 +51,7 @@ public class ImGuiPass : IRenderPass
 
         var cmdBuf = ctx.CommandBuffer;
 
-        cmdBuf.BindPipeline(VkPipelineBindPoint.Graphics, _manager.Pipeline.Handle);
+        cmdBuf.BindPipeline(VkPipelineBindPoint.Graphics, _imGui.Pipeline.Handle);
 
         var viewport = new VkViewport
         {
@@ -67,10 +71,10 @@ public class ImGuiPass : IRenderPass
                 -1.0f - drawData.DisplayPos.Y * scale.Y
             )
         };
-        cmdBuf.PushConstants(_manager.Pipeline.Layout, VkShaderStageFlags.VertexBit, ByteSize.Zero, pushConsts);
+        cmdBuf.PushConstants(_imGui.Pipeline.Layout, VkShaderStageFlags.VertexBit, ByteSize.Zero, pushConsts);
 
-        cmdBuf.BindVertexBuffer(0, _manager.GetVertexBuffer(ctx.FrameIndex), ByteSize.Zero);
-        cmdBuf.BindIndexBuffer(_manager.GetIndexBuffer(ctx.FrameIndex), VkIndexType.UInt16);
+        cmdBuf.BindVertexBuffer(0, _imGui.GetVertexBuffer(ctx.FrameIndex), ByteSize.Zero);
+        cmdBuf.BindIndexBuffer(_imGui.GetIndexBuffer(ctx.FrameIndex), VkIndexType.UInt16);
 
         var clipOff = drawData.DisplayPos;
         var clipScale = drawData.FramebufferScale;
@@ -113,7 +117,7 @@ public class ImGuiPass : IRenderPass
 
                 if (set.VkHandle != lastSet.VkHandle)
                 {
-                    cmdBuf.BindDescriptorSet(VkPipelineBindPoint.Graphics, _manager.Pipeline.Layout, 0, set, null);
+                    cmdBuf.BindDescriptorSet(VkPipelineBindPoint.Graphics, _imGui.Pipeline.Layout, 0, set, null);
                     lastSet = set;
                 }
 
@@ -126,5 +130,7 @@ public class ImGuiPass : IRenderPass
         }
 
         ctx.CommandBuffer.EndRendering();
+        
+        ctx.SetSceneColor(output);
     }
 }

@@ -10,7 +10,7 @@ public sealed class CoreDescriptors : IDisposable
 
     private DescriptorPoolEx _descriptorPool;
     private VkSampler _textureSampler;
-    private VkSampler _targetSampler;
+    public VkSampler TargetSampler { get; private set; }
 
     public VkDescriptorSet GlobalSet { get; private set; }
 
@@ -140,7 +140,7 @@ public sealed class CoreDescriptors : IDisposable
 
         var imageInfo = new VkDescriptorImageInfo
         {
-            Sampler = _targetSampler,
+            Sampler = TargetSampler,
             ImageView = target.View.VkImageView,
             ImageLayout = VkImageLayout.ShaderReadOnlyOptimal
         };
@@ -227,14 +227,14 @@ public sealed class CoreDescriptors : IDisposable
             MaxLod = 0.0f
         };
 
-        _targetSampler = _context.Device.CreateSampler(samplerInfo, null);
+        TargetSampler = _context.Device.CreateSampler(samplerInfo, null);
     }
 
     public void Dispose()
     {
         _context.Device.DestroyDescriptorPool(_descriptorPool, null);
         _context.Device.DestroySampler(_textureSampler, null);
-        _context.Device.DestroySampler(_targetSampler, null);
+        _context.Device.DestroySampler(TargetSampler, null);
 
         _context.Device.DestroyDescriptorSetLayout(GlobalLayout, null);
         _context.Device.DestroyDescriptorSetLayout(PerFrameLayout, null);

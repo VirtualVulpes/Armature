@@ -1,3 +1,4 @@
+using Armature.DebugUi;
 using Armature.Input;
 using Armature.Rendering;
 using Armature.Scene;
@@ -12,7 +13,7 @@ public sealed class Editor : IDisposable
     
     private readonly List<IEditorWindow> _windows;
 
-    public Editor(GraphicsBackend graphics, InputManager input, World world, bool isDocked = false)
+    public Editor(GraphicsBackend graphics, InputManager input, World world, ImGuiManager imGui, bool isDocked = false)
     {
         var selection = new SelectionHelper(world);
 
@@ -20,13 +21,13 @@ public sealed class Editor : IDisposable
         [
             new Inspector(world, selection),
             new SceneView(world, selection, input),
-            new Viewport(graphics.Renderer),
+            new Viewport(graphics.Renderer, imGui, graphics.CoreDescriptors),
         ];
         
         if (isDocked)
         {
             graphics.SetOutputMode(GraphicsOutputMode.Offscreen);
-            _windows.Add(new Viewport(graphics.Renderer));
+            _windows.Add(new Viewport(graphics.Renderer, imGui, graphics.CoreDescriptors));
         }
 
         _descriptors = new EditorDescriptors(graphics.Context);
