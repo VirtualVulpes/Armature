@@ -3,6 +3,7 @@ using Armature.Rendering;
 using Armature.Scene;
 using Armature.Scene.Components;
 using Armature.Scene.Systems;
+using Brutal.Numerics;
 
 namespace Armature.SceneRendering;
 
@@ -17,12 +18,28 @@ public sealed class RenderSystem : ISystem
         _world = world;
     }
 
-    public void BuildScene(GpuCamera camera)
+    public void BuildScene(CameraData camera)
     {
-        Scene.Camera = camera;
-        
+        BuildGpuCamera(camera);
         BuildRenderObjects();
         BuildGpuLights();
+    }
+
+    private void BuildGpuCamera(CameraData camera)
+    {
+        float4x4.Invert(camera.View, out var invView);
+        float4x4.Invert(camera.Proj, out var invProj);
+        var invViewport = new float2(1.0f / camera.ViewportSize.X, 1.0f / camera.ViewportSize.Y);
+        Scene.Camera = new GpuCamera
+        {
+            View = camera.View,
+            Proj = camera.Proj,
+            ViewProj = camera.View * camera.Proj,
+            InvView = invView,
+            InvProj = invProj,
+            Position = camera.Position,
+            InvViewport = invViewport
+        };
     }
 
     private void BuildRenderObjects()
