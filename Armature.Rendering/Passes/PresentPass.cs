@@ -18,9 +18,8 @@ public class PresentPass : IRenderPass
     {
         var input = ctx.SceneColor;
 
-        input.Image.TransitionTo(ctx.CommandBuffer, VkImageLayout.ShaderReadOnlyOptimal,
-            VkPipelineStageFlags.FragmentShaderBit, VkAccessFlags.ShaderReadBit);
-
+        input.AsSampled(ctx.CommandBuffer);
+        
         var attachment = new VkRenderingAttachmentInfo
         {
             ImageView = ctx.SwapchainImageView,

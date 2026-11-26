@@ -4,7 +4,7 @@ using Brutal.ImGuiApi;
 
 namespace Armature.Editor;
 
-public sealed class Inspector
+public sealed class Inspector : IEditorWindow
 {
     private readonly World _world;
     private readonly SelectionHelper _selection;

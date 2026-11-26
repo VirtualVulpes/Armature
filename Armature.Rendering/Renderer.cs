@@ -80,6 +80,25 @@ public sealed class Renderer : IDisposable
         if (pass is ITargetConsumer c) c.OnTargetsRecreated(Targets);
     }
 
+    public bool HasPass(Type type)
+    {
+        foreach (var pass in _passes)
+            if (pass.Pass.GetType() == type) return true;
+        
+        return false;
+    }
+
+    public void TryRemovePass(Type type)
+    {
+        for (var i = _passes.Count - 1; i >= 0; i--)
+        {
+            if (_passes[i].Pass.GetType() == type)
+            {
+                _passes.RemoveAt(i);
+            }
+        }
+    }
+
     public void AddListener(IFrameListener l) => _listeners.Add(l);
 
     private void RecreateSwapchain()

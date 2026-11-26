@@ -9,16 +9,25 @@ public sealed class Editor : IDisposable
     private readonly EditorDescriptors _descriptors;
     private readonly EditorRenderFeature _features;
     private readonly EditorInput _input;
+    
+    private readonly List<IEditorWindow> _windows;
 
-    private readonly Inspector _inspector;
-    private readonly SceneView _sceneView;
-
-    public Editor(GraphicsBackend graphics,
-        InputManager input, World world)
+    public Editor(GraphicsBackend graphics, InputManager input, World world, bool isDocked = false)
     {
         var selection = new SelectionHelper(world);
-        _inspector = new Inspector(world, selection);
-        _sceneView = new SceneView(world, selection, input);
+
+        _windows =
+        [
+            new Inspector(world, selection),
+            new SceneView(world, selection, input),
+            new Viewport(graphics.Renderer),
+        ];
+        
+        if (isDocked)
+        {
+            graphics.SetOutputMode(GraphicsOutputMode.Offscreen);
+            _windows.Add(new Viewport(graphics.Renderer));
+        }
 
         _descriptors = new EditorDescriptors(graphics.Context);
         EditorPipelines.Register(
@@ -29,7 +38,8 @@ public sealed class Editor : IDisposable
             _descriptors
         );
         _features =
-            new EditorRenderFeature(graphics.Renderer, graphics.Context, graphics.Pipelines, graphics.CoreDescriptors, _descriptors);
+            new EditorRenderFeature(graphics.Renderer, graphics.Context, graphics.Pipelines, graphics.CoreDescriptors,
+                _descriptors);
         _input = new EditorInput(input, world, _features.Picker, selection);
     }
 
@@ -37,8 +47,10 @@ public sealed class Editor : IDisposable
     {
         _input.Update();
 
-        _inspector.Draw();
-        _sceneView.Draw();
+        foreach (var w in _windows)
+        {
+            w.Draw();
+        }
     }
 
     public void Dispose()

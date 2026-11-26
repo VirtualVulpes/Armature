@@ -2,7 +2,7 @@ using Armature.Core;
 using Armature.Vulkan;
 using Brutal.VulkanApi.Vma;
 
-namespace Armature.Rendering;
+namespace Armature.Rendering.Meshes;
 
 public sealed class MeshManager : IDisposable
 {

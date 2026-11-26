@@ -1,4 +1,4 @@
-namespace Armature.Rendering;
+namespace Armature.Rendering.Meshes;
 
 public sealed class Mesh
 {

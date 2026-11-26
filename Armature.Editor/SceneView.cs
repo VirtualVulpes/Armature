@@ -7,7 +7,7 @@ using Brutal.Numerics;
 
 namespace Armature.Editor;
 
-public sealed class SceneView
+public sealed class SceneView : IEditorWindow
 {
     private readonly World _world;
     private readonly SelectionHelper _selection;

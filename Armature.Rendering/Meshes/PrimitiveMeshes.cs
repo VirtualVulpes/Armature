@@ -1,6 +1,6 @@
 using Brutal.Numerics;
 
-namespace Armature.Rendering;
+namespace Armature.Rendering.Meshes;
 
 public static class PrimitiveMeshes
 {

@@ -1,6 +1,7 @@
 using System.Runtime.InteropServices;
 using Brutal.GltfApi;
 using Brutal.Numerics;
+using Mesh = Armature.Rendering.Meshes.Mesh;
 
 namespace Armature.Rendering;
 
