@@ -12,7 +12,7 @@ public sealed class EditorRenderFeature : IFrameListener, IDisposable
     private readonly IEditorTargetConsumer[] _consumers;
 
     public EditorRenderFeature(Renderer renderer, VulkanContext ctx, PipelineManager pipelines,
-        CoreDescriptors core, EditorDescriptors descriptors)
+        CoreDescriptors core, EditorDescriptors descriptors, ViewportTarget target)
     {
         _core = core;
         _targets = new EditorTargets(ctx.Allocator, renderer.Targets.Extent);
@@ -20,6 +20,7 @@ public sealed class EditorRenderFeature : IFrameListener, IDisposable
         var seed = new SeedInitPass(pipelines.GetPipeline("Seed Init"), descriptors);
         var flood = new JumpFloodPass(pipelines.GetPipeline("Jump Flood"), descriptors);
         var outline = new OutlineCompositePass(pipelines.GetPipeline("Outline Composite"));
+        var viewport = new ViewportCapturePass(pipelines.GetPipeline("Viewport Capture"), target);
         _consumers = [seed, flood, outline];
         
         Picker = new EntityPicker(ctx, _targets);
@@ -29,6 +30,7 @@ public sealed class EditorRenderFeature : IFrameListener, IDisposable
         renderer.AddPass(seed, RenderPhase.PostScene);
         renderer.AddPass(flood, RenderPhase.PostScene);
         renderer.AddPass(outline, RenderPhase.PostScene);
+        renderer.AddPass(viewport, RenderPhase.PostScene);
         
         renderer.AddListener(this);
         renderer.AddListener(Picker);

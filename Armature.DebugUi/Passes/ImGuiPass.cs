@@ -22,7 +22,7 @@ public class ImGuiPass : IRenderPass
         var output = ctx.AcquireOutput();
         var colorAttachment = output.AsColorAttachment(ctx.CommandBuffer);
 
-        ctx.SceneColor.AsSampled(ctx.CommandBuffer);
+        // ctx.SceneColor.AsSampled(ctx.CommandBuffer);
         
         ctx.CommandBuffer.BeginRendering(
             new VkRenderingInfo
