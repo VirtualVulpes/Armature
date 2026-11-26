@@ -1,8 +1,6 @@
 using Armature.Input;
 using Armature.Rendering;
-using Armature.Rendering.Pipelines;
 using Armature.Scene;
-using Armature.Vulkan;
 
 namespace Armature.Editor;
 
@@ -15,36 +13,30 @@ public sealed class Editor : IDisposable
     private readonly Inspector _inspector;
     private readonly SceneView _sceneView;
 
-    public Editor(VulkanContext context, Renderer renderer, CoreDescriptors core, PipelineManager pipelines,
+    public Editor(GraphicsBackend graphics,
         InputManager input, World world)
     {
         var selection = new SelectionHelper(world);
         _inspector = new Inspector(world, selection);
         _sceneView = new SceneView(world, selection, input);
 
-        _descriptors = new EditorDescriptors(context);
+        _descriptors = new EditorDescriptors(graphics.Context);
         EditorPipelines.Register(
-            context.Device,
-            pipelines,
-            new PipelineBuildContext
-            {
-                ColorFormat = renderer.Swapchain.SurfaceFormat.Format,
-                MsaaSamples = renderer.MsaaSamples
-            }, core,
+            graphics.Context.Device,
+            graphics.Pipelines,
+            graphics.Renderer.Swapchain.SurfaceFormat.Format,
+            graphics.CoreDescriptors,
             _descriptors
         );
         _features =
-            new EditorRenderFeature(renderer, context, pipelines, core, _descriptors);
+            new EditorRenderFeature(graphics.Renderer, graphics.Context, graphics.Pipelines, graphics.CoreDescriptors, _descriptors);
         _input = new EditorInput(input, world, _features.Picker, selection);
     }
 
     public void Update()
     {
         _input.Update();
-    }
 
-    public void Draw()
-    {
         _inspector.Draw();
         _sceneView.Draw();
     }

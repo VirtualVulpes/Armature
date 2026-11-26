@@ -6,10 +6,8 @@ namespace Armature.Rendering;
 
 public static class ModelLoader
 {
-    public static Mesh LoadModel(string fileName)
+    public static Mesh LoadModel(string filePath)
     {
-        var filePath = Path.Join(AppContext.BaseDirectory, "models", fileName);
-
         var loader = new GltfLoader(filePath);
         
         var positionAccessor = loader.GltfJson.Meshes[0].Primitives[0].Attributes["POSITION"];

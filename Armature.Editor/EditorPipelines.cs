@@ -9,7 +9,7 @@ namespace Armature.Editor;
 
 public static class EditorPipelines
 {
-    public static void Register(DeviceEx device, PipelineManager pipelines, PipelineBuildContext ctx, CoreDescriptors core, EditorDescriptors editor)
+    public static void Register(DeviceEx device, PipelineManager pipelines, VkFormat swapchainFormat, CoreDescriptors core, EditorDescriptors editor)
     {
         ShaderLibrary.AddRoot(Path.Combine(AppContext.BaseDirectory, "shaders", "editor"));
 
@@ -31,7 +31,7 @@ public static class EditorPipelines
         
         m.Add("Outline Composite", "fullscreen.vert", "outline_composite.frag", new MeshPipelineOptions
         {
-            ColorFormat = ctx.ColorFormat,
+            ColorFormat = swapchainFormat,
             FragmentPushSize = ByteSize.Of<int>() * 2,
             Layouts = [core.GlobalLayout]
         });

@@ -1,5 +1,4 @@
 using Armature.Rendering.Pipelines;
-using Armature.Vulkan;
 using Brutal;
 using Brutal.VulkanApi;
 using Brutal.VulkanApi.Abstractions;
@@ -8,18 +7,17 @@ namespace Armature.Rendering;
 
 public static class CorePipelines
 {
-    public static void Register(DeviceEx device, PipelineManager pipelines, PipelineBuildContext ctx,
-        CoreDescriptors descriptors)
+    public static void Register(GraphicsBackend graphics)
     {
         ShaderLibrary.AddRoot(Path.Combine(AppContext.BaseDirectory, "shaders", "rendering"));
         
-        var b = new MeshPipelineBuilder(device, pipelines);
-        DescriptorSetLayoutEx[] layouts = [descriptors.GlobalLayout, descriptors.PerFrameLayout];
+        var b = new MeshPipelineBuilder(graphics.Context.Device, graphics.Pipelines);
+        DescriptorSetLayoutEx[] layouts = [graphics.CoreDescriptors.GlobalLayout, graphics.CoreDescriptors.PerFrameLayout];
 
         MeshPipelineOptions Options(ByteSize frag, VkPolygonMode mode = VkPolygonMode.Fill) => new()
         {
-            ColorFormat = ctx.ColorFormat,
-            Samples = ctx.MsaaSamples,
+            ColorFormat = graphics.SwapchainFormat,
+            Samples = graphics.Renderer.MsaaSamples,
             PolygonMode = mode,
             FragmentPushSize = frag,
             Layouts = layouts
@@ -35,9 +33,9 @@ public static class CorePipelines
         b.Add("Phong Color", "world_space.vert", "phong_color.frag", Options(col));
         b.Add("Present", "fullscreen.vert", "present.frag", new MeshPipelineOptions
         {
-            ColorFormat = ctx.ColorFormat,
+            ColorFormat = graphics.SwapchainFormat,
             FragmentPushSize = ByteSize.Of<int>(),
-            Layouts = [descriptors.GlobalLayout]
+            Layouts = [graphics.CoreDescriptors.GlobalLayout]
         });    
     }
 }

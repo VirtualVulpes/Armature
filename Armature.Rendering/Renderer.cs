@@ -40,6 +40,8 @@ public sealed class Renderer : IDisposable
         _window = window;
         _coreDescriptors = coreDescriptors;
 
+        window.OnFramebufferSize += OnFramebufferResize;
+        
         MsaaSamples = (VkSampleCountFlags)int.Min(RenderConstants.DefaultMsaa, (int)GetMaxSampleCount());
 
         for (var i = 0; i < RenderConstants.MaxFramesInFlight; i++)
@@ -257,13 +259,15 @@ public sealed class Renderer : IDisposable
         }
     }
 
-    public void OnFramebufferResize()
+    private void OnFramebufferResize(GlfwWindow window, int2 size)
     {
         _isFramebufferResized = true;
     }
 
     public void Dispose()
     {
+        _window.OnFramebufferSize -= OnFramebufferResize;
+        
         foreach (var r in _frameResources)
         {
             r.DestroySync(_context.Device);

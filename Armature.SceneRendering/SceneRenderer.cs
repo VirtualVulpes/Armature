@@ -23,18 +23,19 @@ public sealed class SceneRenderer : IFrameListener, IDisposable
     public ReadOnlySpan<RenderItem> Items => _items.AsSpan();
     public float4x4 ViewProj => _camera.ViewProj;
 
-    public SceneRenderer(PipelineManager pipelines, MeshManager meshes, VulkanContext context,
-        CoreDescriptors descriptors)
+    public SceneRenderer(GraphicsBackend graphics, MeshManager meshes)
     {
-        _pipelines = pipelines;
+        _pipelines = graphics.Pipelines;
         _meshes = meshes;
-        _context = context;
+        _context = graphics.Context;
+
+        graphics.Renderer.AddListener(this);
 
         for (var i = 0; i < _resources.Length; i++)
         {
             _resources[i] = new SceneFrameResources
             {
-                PerFrameDescriptorSet = descriptors.AllocatePerFrameDescriptorSet()
+                PerFrameDescriptorSet = graphics.CoreDescriptors.AllocatePerFrameDescriptorSet()
             };
         }
 

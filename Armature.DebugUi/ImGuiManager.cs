@@ -1,4 +1,5 @@
 using Armature.Core;
+using Armature.DebugUi.Passes;
 using Armature.Input;
 using Armature.Rendering;
 using Armature.Rendering.Pipelines;
@@ -52,14 +53,14 @@ public sealed class ImGuiManager : IDisposable, IFrameListener, IUiCaptureState
     public BufferEx GetIndexBuffer(int frameIndex)
         => _indexBuffers[frameIndex];
 
-    public ImGuiManager(VmaAllocator allocator, DeviceEx device, CommandBufferManager cmdManager,
-        GlfwWindow window, PipelineBuildContext context, InputManager input)
+    public ImGuiManager(GraphicsBackend graphics,
+        GlfwWindow window, InputManager input)
     {
         ShaderLibrary.AddRoot(Path.Combine(AppContext.BaseDirectory, "shaders", "debug_ui"));
         
-        _allocator = allocator;
-        _device = device;
-        _cmdManager = cmdManager;
+        _allocator = graphics.Context.Allocator;
+        _device = graphics.Context.Device;
+        _cmdManager = graphics.CmdManager;
         _window = window;
         _input = input;
 
@@ -81,12 +82,15 @@ public sealed class ImGuiManager : IDisposable, IFrameListener, IUiCaptureState
 
         CreateResources();
 
-        CreateImGuiPipeline(context);
+        CreateImGuiPipeline(graphics.SwapchainFormat);
 
         _window.OnKey += OnKey;
         _window.OnChar += OnChar;
         _window.OnMouseButton += OnMouseButton;
         _window.OnCursorPos += OnCursorPos;
+        
+        graphics.Renderer.AddListener(this);
+        graphics.Renderer.AddPass(new ImGuiPass(this), RenderPhase.Overlay);
     }
 
     private void SetStyle()
@@ -186,7 +190,7 @@ public sealed class ImGuiManager : IDisposable, IFrameListener, IUiCaptureState
         _fontSampler = _device.CreateSampler(samplerInfo, null);
     }
 
-    private unsafe void CreateImGuiPipeline(PipelineBuildContext context)
+    private unsafe void CreateImGuiPipeline(VkFormat swapchainFormat)
     {
         var shaders = new ShaderCreateInfo[]
         {
@@ -199,13 +203,11 @@ public sealed class ImGuiManager : IDisposable, IFrameListener, IUiCaptureState
             .AddAttribute(0, 0, VkFormat.R32G32SFloat, ByteSize.Zero)
             .AddAttribute(1, 0, VkFormat.R32G32SFloat, ByteSize.Of(8))
             .AddAttribute(2, 0, VkFormat.R8G8B8A8UNorm, ByteSize.Of(16));
-
-        var format = context.ColorFormat;
-
+        
         var rendering = new VkPipelineRenderingCreateInfo
         {
             ColorAttachmentCount = 1,
-            ColorAttachmentFormats = &format
+            ColorAttachmentFormats = &swapchainFormat
         };
 
         ReadOnlySpan<VkPushConstantRange> pushConstantRanges =

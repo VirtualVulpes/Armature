@@ -26,10 +26,9 @@ public sealed class TextureManager : IDisposable
         _supportsBc7 = supportsBc7;
     }
 
-    private unsafe Texture LoadTexture(string fileName, CommandBuffer commandBuffer, VmaAllocator allocator,
+    private unsafe Texture LoadTexture(string filePath, CommandBuffer commandBuffer, VmaAllocator allocator,
         TextureColorSpace colorSpace, TextureId id)
     {
-        var filePath = Path.Join(AppContext.BaseDirectory, "textures", fileName);
         var result =
             KtxTexture.CreateFromNamedFile(Encoding.UTF8.GetBytes(filePath), KtxTextureCreateFlagBits.LoadImageDataBit,
                 out var image);
@@ -86,7 +85,7 @@ public sealed class TextureManager : IDisposable
 
         var textureInfo = new ImageEx.CreateInfo
         {
-            Name = fileName,
+            Name = filePath,
             ImageType = VkImageType._2D,
             ImageFormat = format,
             ImageExtent = new VkExtent3D
@@ -174,14 +173,14 @@ public sealed class TextureManager : IDisposable
         return new Texture(textureImage, textureImageView, id);
     }
 
-    public TextureId AddTexture(string fileName, CommandBuffer commandBuffer, VmaAllocator allocator,
+    public TextureId AddTexture(string filePath, CommandBuffer commandBuffer, VmaAllocator allocator,
         TextureColorSpace colorSpace)
     {
         var textureId = new TextureId(_nextId++);
 
-        var texture = LoadTexture(fileName, commandBuffer, allocator, colorSpace, textureId);
+        var texture = LoadTexture(filePath, commandBuffer, allocator, colorSpace, textureId);
         
-        var name = Path.GetFileNameWithoutExtension(fileName);
+        var name = Path.GetFileNameWithoutExtension(filePath);
 
         _textures.Add(textureId, texture);
         _names.Add(name, textureId);

@@ -46,7 +46,7 @@ public sealed class CommandBufferManager(DeviceEx device, Queue queue, VkCommand
 
         return buffer;
     }
-
+    
     public static void EndSingleTimeCommands(CommandBuffer buffer, Queue queue)
     {
         buffer.End();
