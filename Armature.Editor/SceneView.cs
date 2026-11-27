@@ -17,6 +17,7 @@ public sealed class SceneView : IEditorWindow
     private readonly List<Entity> _roots = [];
     private Entity _active;
     private Entity? _clicked;
+    private bool _deselect;
     private (Entity child, Entity parent, bool has) _pendingReparent;
 
     public SceneView(World world, SelectionHelper selection, InputManager input)
@@ -34,18 +35,26 @@ public sealed class SceneView : IEditorWindow
 
         BuildHierarchy();
 
-        ImGui.Begin("Scene"u8, ImGuiWindowFlags.AlwaysAutoResize);
+        ImGui.Begin("Scene"u8);
 
         foreach (var root in _roots)
+            DrawNode(root); 
+
+        if (_clicked is null && ImGui.IsWindowHovered() && !ImGui.IsAnyItemHovered() &&
+            ImGui.IsMouseClicked(ImGuiMouseButton.Left) && !_input.IsKeyDown(GlfwKey.LeftShift))
         {
-            DrawNode(root);
+            _deselect = true;
         }
 
         ImGui.End();
-        
-        if (_clicked is { } c)
+
+        if (_deselect) {
+            _selection.Clear();
+            _deselect = false;
+        }
+        else if (_clicked is { } c)
             _selection.Click(c, _input.IsKeyDown(GlfwKey.LeftShift));
-        
+
         if (_pendingReparent.has)
             HierarchyExtensions.AddParent(_world, _pendingReparent.child, _pendingReparent.parent);
     }
@@ -85,7 +94,7 @@ public sealed class SceneView : IEditorWindow
 
         var isActive = entity == _active;
         if (isActive) ImGui.PushStyleColor(ImGuiCol.Header, new float4(0.18f, 0.18f, 0.18f, 1.0f));
-        
+
         var open = ImGui.TreeNodeEx(name, flags);
 
         if (isActive)

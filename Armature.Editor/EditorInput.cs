@@ -11,23 +11,25 @@ public sealed class EditorInput
     private readonly World _world;
     private readonly EntityPicker _picker;
     private readonly SelectionHelper _selection;
+    private readonly ViewportState _viewport;
 
     public EditorInput(InputManager input, World world, EntityPicker picker,
-        SelectionHelper selection)
+        SelectionHelper selection, ViewportState viewport)
     {
         _input = input;
         _world = world;
         _picker = picker;
         _selection = selection;
+        _viewport = viewport;
     }
 
     public void Update()
     {
-        var wantMouse = _input.IsUiCapturingMouse();
         var wantKeyboard = _input.IsUiCapturingKeyboard();
 
-        var canPick = _input.InputMode == InputMode.UiInteraction && !wantMouse;
-        _picker.Request(canPick ? new int2((int)_input.CursorPos.X, (int)_input.CursorPos.Y) : null);
+        var overViewport = _viewport.IsValid && _viewport.IsHovered;
+        var canPick = _input.InputMode == InputMode.UiInteraction && overViewport;
+        _picker.Request(canPick ? _viewport.MouseUv : null);
 
         switch (_input.InputMode)
         {
@@ -53,7 +55,7 @@ public sealed class EditorInput
 
                 var hovered = GetHoveredEntity();
 
-                if (!wantMouse && _input.IsMouseButtonPressed(GlfwMouseButton.Left))
+                if (overViewport && _input.IsMouseButtonPressed(GlfwMouseButton.Left))
                     _selection.Click(hovered, _input.IsKeyDown(GlfwKey.LeftShift));
 
                 break;

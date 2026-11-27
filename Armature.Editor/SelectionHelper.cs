@@ -23,7 +23,7 @@ public sealed class SelectionHelper
             
             if (!_world.TryRemoveComponent<SelectionComponent>(e))
             {
-                AddSelection(e);
+                Add(e);
             }
         }
         else
@@ -34,7 +34,7 @@ public sealed class SelectionHelper
             }
             
             if (_world.IsEntityAlive(e))
-                AddSelection(e);
+                Add(e);
         }
 
     }
@@ -42,10 +42,10 @@ public sealed class SelectionHelper
     public void Click(Entity? entity, bool additive)
     {
         if (entity is { } e) SelectEntity(e, additive);
-        else if (!additive) ClearSelection();
+        else if (!additive) Clear();
     }
 
-    public void ClearSelection()
+    public void Clear()
     {
         foreach (var item in _world.Query<SelectionComponent>())
         {
@@ -53,7 +53,7 @@ public sealed class SelectionHelper
         }
     }
 
-    private void AddSelection(Entity e)
+    private void Add(Entity e)
     {
         var order = _nextSelected++;
         _world.AddComponent(e, new SelectionComponent{Order = order});

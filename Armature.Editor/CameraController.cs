@@ -19,7 +19,7 @@ public class CameraController
     private const float Speed = 5.0f;
     private const float Sensitivity = 0.001f;
     
-    public CameraController(World world, InputManager inputManager, CameraSystem cameraSystem)
+    public CameraController(InputManager inputManager, ViewportState viewport, World world, CameraSystem cameraSystem)
     {
         _world = world;
         _inputManager = inputManager;

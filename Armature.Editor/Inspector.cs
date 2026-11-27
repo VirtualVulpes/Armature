@@ -35,16 +35,18 @@ public sealed class Inspector : IEditorWindow
     public void Draw()
     {
         var e = _selection.GetActive();
-        if (!_world.IsEntityAlive(e)) return;
         
-        ImGui.Begin("Inspector"u8, ImGuiWindowFlags.AlwaysAutoResize);
+        ImGui.Begin("Inspector"u8);
 
-        ImGui.PushID((int)e.Id.Value);
-        foreach (var drawer in _drawers.Values)
+        if (_world.IsEntityAlive(e))
         {
-            drawer.Draw(_world, e);
+            ImGui.PushID((int)e.Id.Value);
+            foreach (var drawer in _drawers.Values)
+            {
+                drawer.Draw(_world, e);
+            }
+            ImGui.PopID();
         }
-        ImGui.PopID();
         
         ImGui.End();
     }

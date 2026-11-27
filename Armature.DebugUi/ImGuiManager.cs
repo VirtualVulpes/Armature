@@ -72,9 +72,11 @@ public sealed class ImGuiManager : IDisposable, IFrameListener, IUiCaptureState
             throw new InvalidOperationException("Failed to create ImGui context.");
 
         var io = ImGui.GetIO();
-        io.IniFilename = null; // stop ImGui.ini write
+        // io.IniFilename = null; // stop ImGui.ini write
         UpdateDisplaySize();
-
+        
+        io.ConfigFlags |= ImGuiConfigFlags.DockingEnable;
+        
         io.BackendFlags |= ImGuiBackendFlags.RendererHasTextures;
         io.BackendFlags |= ImGuiBackendFlags.RendererHasVtxOffset;
 
@@ -97,11 +99,18 @@ public sealed class ImGuiManager : IDisposable, IFrameListener, IUiCaptureState
     {
         ImGui.StyleColorsDark();
 
-        ImGui.PushStyleColor(ImGuiCol.TitleBgActive, ImGui.GetStyleColorVec4(ImGuiCol.TitleBg));
+        ImGui.PushStyleColor(ImGuiCol.TitleBg, new float4(0.08f, 0.08f, 0.08f, 1.0f));
+        ImGui.PushStyleColor(ImGuiCol.TitleBgActive, new float4(0.08f, 0.08f, 0.08f, 1.0f));
+        ImGui.PushStyleColor(ImGuiCol.TitleBgCollapsed, new float4(0.08f, 0.08f, 0.08f, 1.0f));
 
         ImGui.PushStyleColor(ImGuiCol.Tab, new float4(0.08f, 0.08f, 0.08f, 1.0f));
         ImGui.PushStyleColor(ImGuiCol.TabSelected, new float4(0.12f, 0.12f, 0.12f, 1.0f));
+        ImGui.PushStyleColor(ImGuiCol.TabSelectedOverline, new float4(0.12f, 0.12f, 0.12f, 1.0f));
         ImGui.PushStyleColor(ImGuiCol.TabHovered, new float4(0.16f, 0.16f, 0.16f, 1.0f));
+
+        ImGui.PushStyleColor(ImGuiCol.TabDimmed, new float4(0.08f, 0.08f, 0.08f, 1.0f));
+        ImGui.PushStyleColor(ImGuiCol.TabDimmedSelected, new float4(0.12f, 0.12f, 0.12f, 1.0f));
+        ImGui.PushStyleColor(ImGuiCol.TabDimmedSelectedOverline, new float4(0.12f, 0.12f, 0.12f, 1.0f));
 
         ImGui.PushStyleColor(ImGuiCol.FrameBg, new float4(0.035f, 0.035f, 0.035f, 1.0f));
         ImGui.PushStyleColor(ImGuiCol.FrameBgActive, new float4(0.07f, 0.07f, 0.07f, 1.0f));
@@ -127,9 +136,11 @@ public sealed class ImGuiManager : IDisposable, IFrameListener, IUiCaptureState
 
         ImGui.PushStyleColor(ImGuiCol.SliderGrab, new float4(0.07f, 0.07f, 0.07f, 1.0f));
         ImGui.PushStyleColor(ImGuiCol.SliderGrabActive, new float4(0.12f, 0.12f, 0.12f, 1.0f));
-
-
+        
         ImGui.PushStyleColor(ImGuiCol.MenuBarBg, new float4(0.12f, 0.12f, 0.12f, 1.0f));
+        
+        ImGui.PushStyleColor(ImGuiCol.DockingEmptyBg, new float4(0.02f, 0.02f, 0.02f, 1.0f));
+        ImGui.PushStyleColor(ImGuiCol.DockingPreview, new float4(0.06f, 0.06f, 0.06f, 1.0f));
 
         var style = ImGui.GetStyle();
         style.FontSizeBase = 16.0f;
@@ -310,7 +321,7 @@ public sealed class ImGuiManager : IDisposable, IFrameListener, IUiCaptureState
     {
         ImGui.GetIO().DeltaTime = float.Max(deltaTime, 1e-5f);
         ImGui.NewFrame();
-
+        
         ImString.SharedStorage.Reset();
     }
 

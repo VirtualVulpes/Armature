@@ -17,7 +17,7 @@ public sealed class GraphicsBackend : IDisposable
     public GraphicsOutputMode TargetMode { get; private set; }
 
     public VkFormat SwapchainFormat => Renderer.Swapchain.SurfaceFormat.Format;
-    public float2 Size => new(Renderer.Swapchain.Extent.Width, Renderer.Swapchain.Extent.Height);
+    public int2 Size => new(Renderer.Swapchain.Extent.Width, Renderer.Swapchain.Extent.Height);
 
     public void WaitIdle() => Context.Device.WaitIdle();
 

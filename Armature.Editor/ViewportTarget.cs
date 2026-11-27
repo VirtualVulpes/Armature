@@ -19,6 +19,9 @@ public sealed class ViewportTarget : IDisposable
     public VkExtent2D Extent { get; private set; }
     public VkDescriptorSet Set { get; private set; }
 
+    public bool HasTarget => Target != null;
+    public int2 Size => new(Extent.Width, Extent.Height);
+
     public ViewportTarget(VmaAllocator allocator, DeviceEx device, VkFormat format, ImGuiManager imGui,
         CoreDescriptors core)
     {
@@ -35,7 +38,7 @@ public sealed class ViewportTarget : IDisposable
         if (Target != null && Target.Extent.Width == size.X && Target.Extent.Height == size.Y) return;
 
         Release();
-
+        
         Extent = new VkExtent2D(size.X, size.Y);
         Target = new RenderTarget(_allocator, "Viewport Render Target", _format, Extent,
             VkImageUsageFlags.SampledBit | VkImageUsageFlags.ColorAttachmentBit);

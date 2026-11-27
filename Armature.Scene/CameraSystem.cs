@@ -42,7 +42,7 @@ public class CameraSystem : ISystem
         _active = pool.GetEntityAt((index + direction + pool.Count) % pool.Count);
     }
 
-    public CameraData GetActiveCameraData(float2 viewport)
+    public CameraData GetActiveCameraData(int2 viewport)
     {
         Resolve();
         if (_active == Entity.Invalid)
@@ -52,7 +52,7 @@ public class CameraSystem : ISystem
         var camera = _world.GetComponent<CameraComponent>(ActiveCamera);
 
         if (viewport.X != 0 && viewport.Y != 0) 
-            camera.AspectRatio = viewport.X / viewport.Y;
+            camera.AspectRatio = (float)viewport.X / viewport.Y;
 
         var view = float4x4.CreateLookAt(transform.Position, transform.Position + TransformExtensions.Forward(transform),
             float3.UnitY);

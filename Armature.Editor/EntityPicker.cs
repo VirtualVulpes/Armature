@@ -35,10 +35,20 @@ public sealed class EntityPicker : IDisposable, IFrameListener
         }
     }
 
-    public void Request(int2? pixel)
+    public void Request(float2? uv)
     {
-        _requested = pixel;
-        if (pixel is null) HoveredObjectId = null;
+        if (uv is not { } c)
+        {
+            _requested = null;
+            HoveredObjectId = null;
+            return;
+        }
+
+        var e = _targets.Extent;
+        _requested = new int2(
+            int.Clamp((int)(c.X * e.Width), 0, e.Width - 1),
+            int.Clamp((int)(c.Y * e.Height), 0, e.Height - 1)
+        );
     }
 
     public void Record(CommandBuffer cmd, int frameIndex, TrackedImage idImage, int2 pixel)
@@ -76,9 +86,9 @@ public sealed class EntityPicker : IDisposable, IFrameListener
             memory.Unmap();
         }
     }
-    
+
     public void OnResize(RenderTargets targets) => Reset();
-    
+
     public void Reset()
     {
         _requested = null;
@@ -94,7 +104,7 @@ public sealed class EntityPicker : IDisposable, IFrameListener
 
         var extent = _targets.Extent;
         if (p.X < 0 || p.Y < 0 || p.X >= extent.Width || p.Y >= extent.Height) return;
-        
+
         Record(ctx.CommandBuffer, ctx.FrameIndex, _targets.EntityId.Image, p);
     }
 
