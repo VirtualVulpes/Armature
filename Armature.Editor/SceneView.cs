@@ -49,7 +49,10 @@ public sealed class SceneView : IEditorWindow
 
         var rest = ImGui.GetContentRegionAvail();
         rest.Y = MathF.Max(rest.Y, 24.0f);
-        ImGui.InvisibleButton("SceneBlank"u8, rest);
+        if (ImGui.InvisibleButton("SceneBlank"u8, rest) && !_input.IsKeyDown(GlfwKey.LeftShift))
+        {
+            _deselect = true;
+        }
 
         if (ImGui.BeginPopupContextItem("SceneContext"u8))
         {
@@ -60,12 +63,6 @@ public sealed class SceneView : IEditorWindow
             }
 
             ImGui.EndPopup();
-        }
-
-        if (_clicked is null && ImGui.IsWindowHovered() && !ImGui.IsAnyItemHovered() &&
-            ImGui.IsMouseClicked(ImGuiMouseButton.Left) && !_input.IsKeyDown(GlfwKey.LeftShift))
-        {
-            _deselect = true;
         }
 
         ImGui.End();

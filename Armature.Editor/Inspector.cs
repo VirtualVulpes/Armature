@@ -9,8 +9,12 @@ public sealed class Inspector : IEditorWindow
 {
     private readonly World _world;
     private readonly SelectionHelper _selection;
+    private Entity _current;
 
     private readonly Dictionary<Type, IComponentDrawer> _drawers = new();
+
+    private readonly ImInputString _nameBuffer = new(128);
+    private Entity? _bufferEntity;
 
     public Inspector(World world, SelectionHelper selection)
     {
@@ -41,6 +45,8 @@ public sealed class Inspector : IEditorWindow
 
         if (_world.IsEntityAlive(e))
         {
+            _current = e;
+            
             ImGui.PushID((int)e.Id.Value);
             foreach (var drawer in _drawers.Values)
                 drawer.Draw(_world, e);
@@ -69,6 +75,10 @@ public sealed class Inspector : IEditorWindow
             }
 
             ImGui.PopID();
+        }
+        else
+        {
+            _bufferEntity = null;
         }
 
         ImGui.End();
@@ -102,46 +112,66 @@ public sealed class Inspector : IEditorWindow
 
     private void DrawName(ref NameComponent c)
     {
-        ImGui.Text(c.Name);
+        if (_bufferEntity != _current)
+        {
+            var name = c.Name;
+            if (name.Length > 60) name = name[..60];
+            _nameBuffer.SetValue(name);
+            _bufferEntity = _current;
+        }
+
+        ImGui.SetNextItemWidth(-1);
+        if(ImGui.InputText("##Name"u8, _nameBuffer))
+        {
+            _nameBuffer.EvaluateLength();
+            var text = _nameBuffer.ToString();
+            if(!text.IsWhiteSpace())
+                c.Name = text;
+        }
+
+        if (ImGui.IsItemDeactivatedAfterEdit() && _nameBuffer.ToString().IsWhiteSpace())
+        {
+            _nameBuffer.SetValue(c.Name);
+        }
     }
 
     private void DrawTransform(ref TransformComponent c)
     {
-        ImGui.DragFloat3("Position"u8, ref c.Position);
-        ImGui.DragFloat3("Scale"u8, ref c.Scale);
+        ImGui.DragFloat3("Position"u8, ref c.Position, 0.05f);
+        ImGui.DragFloat3("Scale"u8, ref c.Scale, 0.01f);
     }
 
     private void DrawRotate(ref RotateComponent c)
     {
-        ImGui.DragFloat3("Local"u8, ref c.LocalAngularVelocity);
-        ImGui.DragFloat3("World"u8, ref c.WorldAngularVelocity);
+        ImGui.DragFloat3("Local"u8, ref c.LocalAngularVelocity, 0.05f);
+        ImGui.DragFloat3("World"u8, ref c.WorldAngularVelocity, 0.05f);
     }
 
     private void DrawColor(ref ColorComponent c)
     {
-        ImGui.DragFloat3("Color"u8, ref c.Color);
+        ImGui.DragFloat3("Color"u8, ref c.Color, 0.01f, 0.0f, 1.0f);
     }
 
     private void DrawLight(ref LightComponent c)
     {
         EnumCombo("Type", ref c.Type);
 
-        ImGui.DragFloat3("Color"u8, ref c.Color);
-        ImGui.DragFloat("Intensity"u8, ref c.Intensity);
+        ImGui.DragFloat3("Color"u8, ref c.Color, 0.01f, 0.0f, 1.0f);
+        ImGui.DragFloat("Intensity"u8, ref c.Intensity, 0.1f, 0.0f, 1000.0f);
 
         switch (c.Type)
         {
             case LightType.Point:
-                ImGui.DragFloat("Range"u8, ref c.Range);
+                ImGui.DragFloat("Range"u8, ref c.Range, 0.1f);
                 break;
             case LightType.Directional:
-                ImGui.DragFloat3("Direction"u8, ref c.Direction);
+                ImGui.DragFloat3("Direction"u8, ref c.Direction, 0.01f);
                 break;
             case LightType.Spot:
-                ImGui.DragFloat("Range"u8, ref c.Range);
-                ImGui.DragFloat3("Direction"u8, ref c.Direction);
-                ImGui.DragFloat("Inner Cos"u8, ref c.InnerCos);
-                ImGui.DragFloat("Outer Cos"u8, ref c.OuterCos);
+                ImGui.DragFloat("Range"u8, ref c.Range, 0.1f);
+                ImGui.DragFloat3("Direction"u8, ref c.Direction, 0.01f);
+                ImGui.DragFloat("Inner Cos"u8, ref c.InnerCos, 0.01f);
+                ImGui.DragFloat("Outer Cos"u8, ref c.OuterCos, 0.01f);
                 break;
             default:
                 throw new ArgumentOutOfRangeException($"Invalid light type: {c.Type}");
