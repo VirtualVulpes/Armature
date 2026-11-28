@@ -90,6 +90,7 @@ public sealed class ImGuiManager : IDisposable, IFrameListener, IUiCaptureState
         _window.OnChar += OnChar;
         _window.OnMouseButton += OnMouseButton;
         _window.OnCursorPos += OnCursorPos;
+        _window.OnScroll += OnScroll;
         
         graphics.Renderer.AddListener(this);
         graphics.Renderer.AddPass(new ImGuiPass(this), RenderPhase.Overlay);
@@ -606,6 +607,11 @@ public sealed class ImGuiManager : IDisposable, IFrameListener, IUiCaptureState
         ImGui.GetIO().AddMousePosEvent((float)pos.X * scale.X, (float)pos.Y * scale.Y);
     }
 
+    private void OnScroll(GlfwWindow window, double2 offset)
+    {
+        ImGui.GetIO().AddMouseWheelEvent((float)offset.X, (float)offset.Y);
+    }
+
     public void Dispose()
     {
         foreach (var backend in _textures.Values)
@@ -638,6 +644,7 @@ public sealed class ImGuiManager : IDisposable, IFrameListener, IUiCaptureState
         _window.OnChar -= OnChar;
         _window.OnMouseButton -= OnMouseButton;
         _window.OnCursorPos -= OnCursorPos;
+        _window.OnScroll -= OnScroll;
 
         ImGui.DestroyContext(_context);
     }

@@ -1,6 +1,7 @@
 using Armature.Scene;
 using Armature.Scene.Components;
 using Brutal.ImGuiApi;
+using Brutal.Numerics;
 
 namespace Armature.Editor;
 
@@ -16,8 +17,8 @@ public sealed class Inspector : IEditorWindow
         _world = world;
         _selection = selection;
 
-        Register<NameComponent>("Name", DrawName);
-        Register<TransformComponent>("Transform", DrawTransform);
+        Register<NameComponent>("Name", DrawName, () => new NameComponent { Name = "New Entity" });
+        Register<TransformComponent>("Transform", DrawTransform, () => TransformComponent.Identity);
         Register<RotateComponent>("Rotation", DrawRotate);
         Register<ColorComponent>("Color", DrawColor);
         Register<LightComponent>("Light", DrawLight);
@@ -27,27 +28,49 @@ public sealed class Inspector : IEditorWindow
         Register<PipelineComponent>("Pipeline", DrawPipeline);
     }
 
-    private void Register<T>(string name, RefAction<T> draw) where T : struct
+    private void Register<T>(string name, RefAction<T> draw, Func<T>? create = null) where T : struct
     {
-        _drawers[typeof(T)] = new ComponentDrawer<T>(name, draw);
+        _drawers[typeof(T)] = new ComponentDrawer<T>(name, draw, create);
     }
 
     public void Draw()
     {
         var e = _selection.GetActive();
-        
+
         ImGui.Begin("Inspector"u8);
 
         if (_world.IsEntityAlive(e))
         {
             ImGui.PushID((int)e.Id.Value);
             foreach (var drawer in _drawers.Values)
-            {
                 drawer.Draw(_world, e);
+
+            ImGui.Separator();
+
+            if (ImGui.Button("Add Component"u8, new float2(-1.0f, 0.0f)))
+                ImGui.OpenPopup("AddComponent"u8);
+
+            if (ImGui.BeginPopup("AddComponent"u8))
+            {
+                var any = false;
+                foreach (var drawer in _drawers.Values)
+                {
+                    if (drawer.Has(_world, e)) continue;
+                    any = true;
+
+                    if (ImGui.MenuItem(drawer.Name))
+                        drawer.Add(_world, e);
+                }
+
+                if (!any)
+                    ImGui.TextDisabled("All components added"u8);
+
+                ImGui.EndPopup();
             }
+
             ImGui.PopID();
         }
-        
+
         ImGui.End();
     }
 
@@ -66,22 +89,22 @@ public sealed class Inspector : IEditorWindow
                     value = item;
                     changed = true;
                 }
-                
+
                 if (selected)
                     ImGui.SetItemDefaultFocus();
             }
-            
+
             ImGui.EndCombo();
         }
 
         return changed;
     }
-    
+
     private void DrawName(ref NameComponent c)
     {
         ImGui.Text(c.Name);
     }
-    
+
     private void DrawTransform(ref TransformComponent c)
     {
         ImGui.DragFloat3("Position"u8, ref c.Position);
@@ -93,16 +116,16 @@ public sealed class Inspector : IEditorWindow
         ImGui.DragFloat3("Local"u8, ref c.LocalAngularVelocity);
         ImGui.DragFloat3("World"u8, ref c.WorldAngularVelocity);
     }
-    
+
     private void DrawColor(ref ColorComponent c)
     {
         ImGui.DragFloat3("Color"u8, ref c.Color);
     }
-    
+
     private void DrawLight(ref LightComponent c)
     {
         EnumCombo("Type", ref c.Type);
-        
+
         ImGui.DragFloat3("Color"u8, ref c.Color);
         ImGui.DragFloat("Intensity"u8, ref c.Intensity);
 
@@ -124,7 +147,7 @@ public sealed class Inspector : IEditorWindow
                 throw new ArgumentOutOfRangeException($"Invalid light type: {c.Type}");
         }
     }
-    
+
     private void DrawCamera(ref CameraComponent c)
     {
         ImGui.Text($"Aspect Ratio {c.AspectRatio}");
@@ -132,19 +155,19 @@ public sealed class Inspector : IEditorWindow
         ImGui.Text($"Z Near {c.ZNear}");
         ImGui.Text($"Z Far {c.ZFar}");
     }
-    
+
     private void DrawMesh(ref MeshComponent c)
-    {   
+    {
         ImGui.Text($"Id {c.MeshId.Value}");
     }
-    
+
     private void DrawTexture(ref TextureComponent c)
-    {   
+    {
         ImGui.Text($"Id {c.TextureId.Value}");
     }
-    
+
     private void DrawPipeline(ref PipelineComponent c)
-    {   
+    {
         ImGui.Text($"Id {c.PipelineId.Value}");
     }
 }

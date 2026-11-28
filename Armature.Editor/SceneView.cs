@@ -19,6 +19,8 @@ public sealed class SceneView : IEditorWindow
     private Entity? _clicked;
     private bool _deselect;
     private (Entity child, Entity parent, bool has) _pendingReparent;
+    private Entity? _pendingCreateChild;
+    private Entity? _pendingDelete;
 
     public SceneView(World world, SelectionHelper selection, InputManager input)
     {
@@ -32,13 +34,33 @@ public sealed class SceneView : IEditorWindow
         _active = _selection.GetActive();
         _clicked = null;
         _pendingReparent = default;
+        _pendingCreateChild = null;
+        _pendingDelete = null;
 
         BuildHierarchy();
 
         ImGui.Begin("Scene"u8);
 
+        ImGui.PushStyleVar(ImGuiStyleVar.ItemSpacing, new float2(ImGui.GetStyle().ItemSpacing.X, 0.0f));
+        ImGui.PushStyleVar(ImGuiStyleVar.FramePadding, new float2(4.0f, 2.0f));
         foreach (var root in _roots)
-            DrawNode(root); 
+            DrawNode(root);
+        ImGui.PopStyleVar(2);
+
+        var rest = ImGui.GetContentRegionAvail();
+        rest.Y = MathF.Max(rest.Y, 24.0f);
+        ImGui.InvisibleButton("SceneBlank"u8, rest);
+
+        if (ImGui.BeginPopupContextItem("SceneContext"u8))
+        {
+            if (ImGui.MenuItem("New Entity"u8))
+            {
+                var e = _world.CreateEntity();
+                _selection.Click(e, false);
+            }
+
+            ImGui.EndPopup();
+        }
 
         if (_clicked is null && ImGui.IsWindowHovered() && !ImGui.IsAnyItemHovered() &&
             ImGui.IsMouseClicked(ImGuiMouseButton.Left) && !_input.IsKeyDown(GlfwKey.LeftShift))
@@ -48,15 +70,30 @@ public sealed class SceneView : IEditorWindow
 
         ImGui.End();
 
-        if (_deselect) {
+        if (_deselect)
+        {
             _selection.Clear();
             _deselect = false;
         }
         else if (_clicked is { } c)
+        {
             _selection.Click(c, _input.IsKeyDown(GlfwKey.LeftShift));
+        }
 
         if (_pendingReparent.has)
             HierarchyExtensions.AddParent(_world, _pendingReparent.child, _pendingReparent.parent);
+
+        if (_pendingCreateChild is { } parent)
+        {
+            var child = _world.CreateEntity();
+            HierarchyExtensions.AddParent(_world, child, parent);
+            _selection.Click(child, false);
+        }
+
+        if (_pendingDelete is { } doomed)
+        {
+            _world.DestroyEntity(doomed);
+        }
     }
 
     private void BuildHierarchy()
@@ -84,7 +121,8 @@ public sealed class SceneView : IEditorWindow
         _children.TryGetValue(entity, out var kids);
         var hasKids = kids is { Count: > 0 };
 
-        var flags = ImGuiTreeNodeFlags.OpenOnArrow | ImGuiTreeNodeFlags.SpanAvailWidth | ImGuiTreeNodeFlags.DefaultOpen;
+        var flags = ImGuiTreeNodeFlags.OpenOnArrow | ImGuiTreeNodeFlags.SpanAvailWidth |
+                    ImGuiTreeNodeFlags.DefaultOpen | ImGuiTreeNodeFlags.FramePadding;
         if (!hasKids) flags |= ImGuiTreeNodeFlags.Leaf;
         if (_world.HasComponent<SelectionComponent>(entity)) flags |= ImGuiTreeNodeFlags.Selected;
 
@@ -103,6 +141,21 @@ public sealed class SceneView : IEditorWindow
         if (ImGui.IsItemClicked() && !ImGui.IsItemToggledOpen())
             _clicked = entity;
 
+        if (ImGui.IsItemHovered(ImGuiHoveredFlags.AllowWhenBlockedByPopup) &&
+            ImGui.IsMouseClicked(ImGuiMouseButton.Right))
+            _clicked = entity;
+
+        if (ImGui.BeginPopupContextItem("NodeContext"u8))
+        {
+            if (ImGui.MenuItem("Add Child"u8))
+                _pendingCreateChild = entity;
+
+            if (ImGui.MenuItem("Delete"u8))
+                _pendingDelete = entity;
+
+            ImGui.EndPopup();
+        }
+
         if (open)
         {
             if (hasKids)
@@ -119,6 +172,6 @@ public sealed class SceneView : IEditorWindow
     {
         return _world.HasComponent<NameComponent>(entity)
             ? _world.GetComponent<NameComponent>(entity).Name
-            : $"Entity {entity.Id.Value}";
+            : $"New Entity";
     }
 }
